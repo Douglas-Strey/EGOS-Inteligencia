@@ -6,12 +6,28 @@ Idioma: **Português (Brasil)** | [English](#english)
 
 [![CI](https://github.com/World-Open-Graph/br-acc/actions/workflows/ci.yml/badge.svg)](https://github.com/World-Open-Graph/br-acc/actions/workflows/ci.yml)
 [![Licença: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
+[![API Status](https://img.shields.io/badge/API-ONLINE-brightgreen)](http://217.216.95.126/health)
+[![Discord Bot](https://img.shields.io/badge/Discord-EGOS%20Intelligence-7289da)](https://discord.gg/egos)
 
 > **Em uma frase:** O BR/ACC conecta dados públicos do Brasil (empresas, políticos, contratos, sanções, doações eleitorais) em um grafo que mostra quem se relaciona com quem.
 
 Site: [bracc.org](https://bracc.org) | Iniciativa: [World Open Graph](https://worldopengraph.com) | Upstream: [World-Open-Graph/br-acc](https://github.com/World-Open-Graph/br-acc)
 
 > **Este fork** é mantido pela comunidade [EGOS](https://egos.ia.br) com foco em: tradução PT-BR, acessibilidade para leigos, integração com bots (Discord/Telegram/WhatsApp) e algoritmos de detecção de anomalias. Todas as contribuições são enviadas como PR ao repositório original.
+
+---
+
+## Status do Servidor (LIVE)
+
+| Serviço | Status | URL |
+|---|---|---|
+| **API Pública** | ✅ Online | http://217.216.95.126/health |
+| **Frontend** | ✅ Online | http://217.216.95.126 |
+| **Neo4j** | ✅ Healthy (48GB RAM) | Interno |
+| **Discord Bot** | ✅ Online | `@EGOS Intelligence#2881` |
+| **Telegram Bot** | 🔵 Em breve | [@ethikin](https://t.me/ethikin) |
+
+**Servidor:** Contabo VPS 40 — 12 vCPU, 48GB RAM, 250GB NVMe
 
 ---
 
@@ -52,33 +68,41 @@ Para a matriz legal completa de datasets, veja: [Matriz de Bases Públicas Brasi
 
 ---
 
-## Como Funciona
-
-```
-[38+ Fontes Oficiais] → [ETL Python] → [Neo4j Grafo] → [API FastAPI] → [Frontend React]
-```
-
-| Componente | Tecnologia |
-|---|---|
-| **Banco de Dados** | Neo4j 5 Community (grafo — especializado em conexões) |
-| **Backend** | FastAPI (Python 3.12, assíncrono) |
-| **Frontend** | React 19 + Vite + visualização de grafo interativa |
-| **ETL** | Python com pandas — coleta, limpa e carrega os dados |
-| **Infra** | Docker Compose (roda tudo com um comando) |
-
----
-
 ## Quero Usar! Como Começo?
 
 ### Opção 1: Usar os Bots (Sem Instalar Nada)
 
 Os dados do BR/ACC estão disponíveis via bots de mensagem que respondem em português:
 
-- **Discord:** [Servidor EGOS](https://discord.gg/egos) — bot `@EGOS Intelligence`
-- **Telegram:** [@ethikin](https://t.me/ethikin)
-- **WhatsApp:** Em breve
+**Discord:** Entre no [Servidor EGOS](https://discord.gg/egos) e mencione `@EGOS Intelligence`
 
-Pergunte: *"Quais os vínculos da empresa CNPJ 00.000.000/0001-00?"*
+Exemplos de perguntas:
+```
+@EGOS Intelligence quais os vínculos da empresa CNPJ 11222333000181?
+@EGOS Intelligence quais são as estatísticas do BR/ACC?
+@EGOS Intelligence busque licitações de saúde em São Paulo
+@EGOS Intelligence quem são os maiores supersalários do TJSP?
+```
+
+O bot tem **11 ferramentas OSINT** integradas:
+
+| Ferramenta | O Que Faz | Fonte |
+|---|---|---|
+| `bracc_meta_stats` | Estatísticas gerais do grafo | BR/ACC |
+| `bracc_company_graph` | Grafo de vínculos de empresa por CNPJ | BR/ACC |
+| `bracc_company_patterns` | Padrões de risco de empresa | BR/ACC |
+| `fetch_top_earners` | Maiores supersalários do Judiciário | Extrateto |
+| `check_specific_member` | Dados de servidor público específico | Extrateto |
+| `get_member_history` | Histórico mensal de pagamentos | Extrateto |
+| `list_orgaos` | Ranking de órgãos do Judiciário | Extrateto |
+| `list_estados` | Estatísticas por estado | Extrateto |
+| `search_gazettes` | Busca em diários oficiais de 5.570+ municípios | Querido Diário |
+| `search_licitacoes` | Busca de licitações e pregões | Querido Diário |
+| `search_contratos` | Busca de contratos públicos | Querido Diário |
+
+**Telegram:** [@ethikin](https://t.me/ethikin) — em integração
+
+**WhatsApp:** Em breve
 
 ### Opção 2: Rodar Localmente (Desenvolvedores)
 
@@ -88,10 +112,11 @@ cd br-acc
 cp .env.example .env
 # Edite o .env e defina NEO4J_PASSWORD
 
-make dev
+cd infra && docker compose up -d
+# Aguarde Neo4j ficar healthy (~30s)
 
 export NEO4J_PASSWORD=sua_senha
-make seed
+bash infra/scripts/seed-dev.sh
 ```
 
 Depois de rodar:
@@ -99,18 +124,34 @@ Depois de rodar:
 - **API:** http://localhost:8000/health
 - **Neo4j Browser:** http://localhost:7474
 
-### Opção 3: Hospedar Seu Próprio Servidor
+### Opção 3: Usar Nossa API Pública
 
-Para o dataset completo (141M nós): mínimo 32GB RAM, recomendado 48-64GB.
+A API está online e acessível:
 
-| Provedor | Config | Preço/mês |
-|---|---|---|
-| **Contabo VPS 40** | 12 vCPU, 48GB RAM, 250GB NVMe | ~R$143/mês |
-| Contabo VPS 30 | 8 vCPU, 24GB RAM, 200GB NVMe | ~R$80/mês |
-| Hetzner CCX33 | 8 vCPU ded., 32GB RAM, 240GB | ~R$275/mês |
-| Oracle Cloud Free | 4 ARM, 24GB RAM | Grátis (testes) |
+```bash
+# Estatísticas gerais
+curl http://217.216.95.126/api/v1/public/meta
 
-Guia completo de setup: em breve em [egos.ia.br/guia](https://egos.ia.br/guia)
+# Grafo de vínculos de uma empresa
+curl http://217.216.95.126/api/v1/public/graph/company/11222333000181
+```
+
+---
+
+## Como Funciona
+
+```
+[38+ Fontes Oficiais] → [ETL Python] → [Neo4j Grafo] → [API FastAPI] → [Frontend React + Bots]
+```
+
+| Componente | Tecnologia |
+|---|---|
+| **Banco de Dados** | Neo4j 5 Community (grafo) |
+| **Backend** | FastAPI (Python 3.12, assíncrono) |
+| **Frontend** | React 19 + Vite + grafo interativo |
+| **ETL** | Python com pandas (45 pipelines) |
+| **Bots** | Discord.js + AI Router (OpenRouter) |
+| **Infra** | Docker Compose + Caddy |
 
 ---
 
@@ -119,15 +160,13 @@ Guia completo de setup: em breve em [egos.ia.br/guia](https://egos.ia.br/guia)
 | Método | Rota | O Que Faz |
 |---|---|---|
 | GET | `/health` | Verifica se o servidor está online |
-| GET | `/api/v1/public/meta` | Estatísticas: quantos dados estão carregados |
+| GET | `/api/v1/public/meta` | Estatísticas: total de dados carregados |
 | GET | `/api/v1/public/graph/company/{cnpj}` | Grafo de vínculos de uma empresa |
 | GET | `/api/v1/public/patterns/company/{cnpj}` | Padrões de risco (desabilitado no modo público) |
 
 ---
 
 ## Modos de Operação
-
-O BR/ACC protege a privacidade com feature flags:
 
 | Variável | Padrão | O Que Controla |
 |---|---|---|
@@ -139,39 +178,31 @@ Esses defaults cumprem a LGPD e evitam uso indevido.
 
 ---
 
-## Mapa do Repositório
-
-| Pasta | O Que Tem |
-|---|---|
-| `api/` | FastAPI — rotas, queries Cypher, serviços |
-| `etl/` | Pipelines ETL — coleta e carrega dados no Neo4j |
-| `frontend/` | React — explorador visual do grafo |
-| `infra/` | Docker Compose, bootstrap do Neo4j |
-| `scripts/` | Scripts operacionais e de validação |
-| `docs/` | Documentação, legal, datasets |
-
----
-
 ## Quero Contribuir!
 
-Contribuições são muito bem-vindas. Veja [CONTRIBUTING.md](CONTRIBUTING.md).
+Contribuições são muito bem-vindas. Veja [CONTRIBUTING.md](CONTRIBUTING.md) e o [ROADMAP.md](ROADMAP.md).
 
 | Nível | O Que Fazer | Precisa Programar? |
 |---|---|---|
 | **Iniciante** | Tradução, documentação, reportar bugs | Não |
 | **Intermediário** | Pipelines ETL para novas fontes de dados | Sim (Python) |
-| **Avançado** | Algoritmos de anomalia, queries Cypher otimizadas | Sim (Python + Neo4j) |
+| **Avançado** | Algoritmos de anomalia, queries Cypher | Sim (Python + Neo4j) |
 
-**Issues abertas:** [ver issues](https://github.com/enioxt/br-acc/issues) — várias marcadas como `good first issue`
+**Issues abertas:** [github.com/enioxt/br-acc/issues](https://github.com/enioxt/br-acc/issues) — várias marcadas como `good first issue`
 
-### O Que Este Fork Adiciona (em desenvolvimento)
+### O Que Este Fork Adiciona
 
-- Tradução completa PT-BR (docs, frontend, API)
-- Bots conversacionais (Discord, Telegram, WhatsApp)
-- Algoritmos: Lei de Benford, HHI (concentração de fornecedores)
-- Pipeline ETL: Extrateto (salários do judiciário)
-- MCP Server para IDEs (Cursor, Windsurf, Claude)
-- Copy acessível para não-programadores
+- ✅ README PT-BR acessível para leigos
+- ✅ Servidor público com API online (48GB RAM, Contabo)
+- ✅ Bot Discord com 11 ferramentas OSINT
+- ✅ ROADMAP público com coordenação de tasks
+- ✅ 11 issues organizadas para voluntários
+- 🔵 Tradução completa do frontend (i18next)
+- 🔵 Bot Telegram
+- 🟡 Algoritmos: Lei de Benford, HHI
+- 🟡 ETL: Extrateto (salários do judiciário)
+- 🟡 Bot WhatsApp
+- 🟡 MCP Server para IDEs
 
 ---
 
@@ -179,12 +210,11 @@ Contribuições são muito bem-vindas. Veja [CONTRIBUTING.md](CONTRIBUTING.md).
 
 - [Política de Ética](ETHICS.md) — usos proibidos, linguagem neutra
 - [LGPD](LGPD.md) — tratamento de dados pessoais
-- [Termos de Uso](TERMS.md) — condições de uso
+- [Termos de Uso](TERMS.md)
 - [Aviso Legal](DISCLAIMER.md) — sinais ≠ prova jurídica
 - [Privacidade](PRIVACY.md)
 - [Segurança](SECURITY.md) — reportar vulnerabilidades
 - [Resposta a Abuso](ABUSE_RESPONSE.md)
-- [Índice Legal](docs/legal/legal-index.md)
 
 ## Licença
 
@@ -200,53 +230,35 @@ BR/ACC Open Graph is an open-source graph infrastructure for Brazilian public da
 
 This fork is maintained by the [EGOS](https://egos.ia.br) community, focused on: PT-BR translation, accessibility for non-technical users, bot integrations (Discord/Telegram/WhatsApp), and anomaly detection algorithms. All contributions are submitted as PRs to the [upstream repository](https://github.com/World-Open-Graph/br-acc).
 
+## Live Infrastructure
+
+| Service | Status | URL |
+|---|---|---|
+| **Public API** | ✅ Online | http://217.216.95.126/health |
+| **Frontend** | ✅ Online | http://217.216.95.126 |
+| **Discord Bot** | ✅ Online (11 OSINT tools) | `@EGOS Intelligence#2881` |
+
 ## Quick Start
 
 ```bash
-git clone https://github.com/enioxt/br-acc.git
-cd br-acc
-cp .env.example .env
-# set NEO4J_PASSWORD
-
-make dev
-
-export NEO4J_PASSWORD=your_password
-make seed
+git clone https://github.com/enioxt/br-acc.git && cd br-acc
+cp .env.example .env  # set NEO4J_PASSWORD
+cd infra && docker compose up -d
+export NEO4J_PASSWORD=your_password && bash infra/scripts/seed-dev.sh
 ```
-
-- API: `http://localhost:8000/health`
-- Frontend: `http://localhost:3000`
-- Neo4j Browser: `http://localhost:7474`
-
-## Architecture
-
-- **Graph DB:** Neo4j 5 Community
-- **Backend:** FastAPI (Python 3.12+, async)
-- **Frontend:** Vite + React 19 + TypeScript
-- **ETL:** Python (pandas, httpx)
-- **Infra:** Docker Compose
-
-## API Surface
-
-| Method | Route | Description |
-|---|---|---|
-| GET | `/health` | Health check |
-| GET | `/api/v1/public/meta` | Aggregated metrics and source health |
-| GET | `/api/v1/public/graph/company/{cnpj_or_id}` | Public company subgraph |
-| GET | `/api/v1/public/patterns/company/{cnpj_or_id}` | `503` while pattern engine is disabled |
 
 ## What This Fork Adds
 
 - Full PT-BR translation (docs, frontend, API errors)
-- Conversational bots (Discord, Telegram, WhatsApp) via EGOS AI Router
-- Anomaly detection: Benford's Law, HHI (supplier concentration)
-- ETL pipeline: Extrateto (judiciary salaries)
-- MCP Server for IDEs
-- Accessible copy for non-programmers
+- Public server with live API (48GB RAM, Contabo VPS)
+- Discord bot with 11 OSINT tools via EGOS AI Router
+- Anomaly detection: Benford's Law, HHI (in progress)
+- ETL pipeline: Extrateto judiciary salaries (in progress)
+- Public ROADMAP with task coordination
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md). Open issues: [github.com/enioxt/br-acc/issues](https://github.com/enioxt/br-acc/issues)
+See [CONTRIBUTING.md](CONTRIBUTING.md) · [ROADMAP.md](ROADMAP.md) · [Issues](https://github.com/enioxt/br-acc/issues)
 
 ## Legal & Ethics
 
@@ -259,5 +271,3 @@ See [CONTRIBUTING.md](CONTRIBUTING.md). Open issues: [github.com/enioxt/br-acc/i
 ---
 
 *"Dados públicos são sinais, não prova jurídica. Nossa missão é torná-los acessíveis a todos."*
-
-*"Public data patterns are signals, not legal proof. Our mission is to make them accessible to everyone."*
