@@ -48,13 +48,13 @@
 |---|---|---|---|---|
 | 21 | CEIS (CGU) | ✅ Carregado | 22k sanções | CPF/CNPJ → Empresa/Pessoa |
 | 22 | CNEP (CGU) | ✅ Carregado | 1.5k sanções | CPF/CNPJ → Empresa/Pessoa |
-| 23 | CEPIM (CGU) | 🔧 Pipeline pronto | ~5k ONGs | CNPJ → ONG bloqueada |
-| 24 | CEAF (CGU) | 🔧 Pipeline pronto | ~8k servidores | CPF → Servidor expulso |
+| 23 | CEPIM (CGU) | ✅ Carregado | 3.5k ONGs | CNPJ → ONG bloqueada |
+| 24 | CEAF (CGU) | ✅ Carregado | 4.1k servidores | CPF → Servidor expulso |
 | 78 | TCU Auditorias | 🔧 Pipeline pronto | Variável | CNPJ → Irregularidade |
 | 79 | TCEs/TCMs | ⬜ Precisa pipeline | Variável por estado | CNPJ/CPF → Auditoria estadual |
-| — | Acordos de Leniência | 🔧 Pipeline pronto | ~200 | CNPJ → Acordo |
-| — | PEP CGU | 🔧🚫 Pipeline pronto, download manual | ~30k PEPs | CPF → Cargo político |
-| — | OpenSanctions | 📥 Carregando | 4.1M entidades | Global → BR cross-ref |
+| — | Acordos de Leniência | ✅ Carregado | 146 acordos | CNPJ → Acordo |
+| — | PEP CGU | ✅ Carregado | 133k PEPs | CPF → Cargo político |
+| — | OpenSanctions | ✅ Carregado | 4.1M entidades | Global → BR cross-ref |
 | — | ICIJ Offshore | 📥 Baixado | 73MB | Offshore → BR empresas |
 | — | OFAC (EUA) | 🔧 Pipeline pronto | ~12k | Sanções US → BR |
 | — | UN Sanctions | 🔧 Pipeline pronto | ~1k | Sanções ONU → BR |
@@ -63,7 +63,7 @@
 
 | # | Fonte | Status | Tamanho | Cruzamento |
 |---|---|---|---|---|
-| 5 | CNPJ/QSA Receita | 🔧🚫 Pipeline pronto, download 25GB | 53.6M empresas | CNPJ → Sócios → CPF |
+| 5 | CNPJ/QSA Receita | ⏳ Baixando (23% de 60GB) | 53.6M empresas | CNPJ → Sócios → CPF |
 | 6 | Juntas Comerciais | ⬜ Precisa pipeline | Variável | Atos societários |
 | — | Holdings (participações) | 🔧 Pipeline pronto | Variável | CNPJ → Controla → CNPJ |
 
@@ -99,8 +99,8 @@
 | 2 | Portal Transparência | 🔧🚫 Pipeline pronto, download manual | Grande | Gastos federais |
 | 3 | Tesouro Transparente | ⬜ Precisa pipeline | Séries | Dívida pública |
 | 4 | Base dos Dados | ⬜ Precisa pipeline | Meta-plataforma | Acesso simplificado |
-| — | CPGF (Cartão Gov) | 🔧 Pipeline pronto | ~2M transações | CPF servidor → Gasto |
-| — | Viagens Gov | 🔧 Pipeline pronto | ~500k | CPF → Viagem gov |
+| — | CPGF (Cartão Gov) | ✅ Carregado | 9.6k transações | CPF servidor → Gasto |
+| — | Viagens Gov | ✅ Carregado | 14.2k viagens | CPF → Viagem gov |
 | — | TransfereGov | 🔧 Pipeline pronto | Grande | Transferências federais |
 | — | Renúncias fiscais | 🔧 Pipeline pronto | ~100k | CNPJ → Incentivo fiscal |
 
@@ -108,9 +108,9 @@
 
 | # | Fonte | Status | Tamanho | Cruzamento |
 |---|---|---|---|---|
-| 29 | TSE Candidaturas | 🔧 Pipeline pronto | ~500k/eleição | CPF → Candidato |
-| 30 | TSE Bens | 🔧 Pipeline pronto | ~1M declarações | CPF → Patrimônio declarado |
-| 31 | TSE Doações | 🔧 Pipeline pronto | ~5M doações | CNPJ/CPF → Doação → Candidato |
+| 29 | TSE Candidaturas | ✅ Carregado (2022+2024) | ~500k/eleição | CPF → Candidato |
+| 30 | TSE Bens | ✅ Carregado (2022+2024) | ~1M declarações | CPF → Patrimônio declarado |
+| 31 | TSE Doações | ✅ Carregado (2022+2024) | ~5M doações | CNPJ/CPF → Doação → Candidato |
 | 32 | TSE Resultados | ⬜ Precisa pipeline | ~500k | Candidato → Resultado |
 | — | TSE Filiados | 🔧 Pipeline pronto | ~16M | CPF → Partido |
 
@@ -212,7 +212,7 @@
 
 | Fonte | Status | Entidades | Cruzamento |
 |---|---|---|---|
-| OpenSanctions | 📥 Carregando | 4.136.365 | Sanções globais → BR |
+| OpenSanctions | ✅ Carregado | 4.136.365 | Sanções globais → BR |
 | ICIJ Offshore Leaks | 📥 Baixado | ~800k | Panama/Pandora → BR |
 | OFAC (EUA) | 🔧 Pipeline pronto | ~12k | Sanções US → BR |
 | UN Sanctions | 🔧 Pipeline pronto | ~1k | Sanções ONU → BR |
@@ -223,23 +223,28 @@
 
 ## Fases de Implementação
 
-### Fase 1 — Fundação (Semana 1-2) 🟢 EM ANDAMENTO
+### Fase 1 — Fundação ✅ CONCLUÍDA
 
 **Objetivo:** Carregar as bases de maior valor para cruzamento imediato.
 
 | Tarefa | Status | Responsável |
 |---|---|---|
 | CEIS/CNEP → Neo4j | ✅ Feito | Automático |
-| OpenSanctions → Neo4j | 🔄 Carregando | Automático |
-| ICIJ Offshore → Neo4j | 📥 Baixado | Automático |
-| PEP CGU (download manual) | 🚫 Precisa browser | **Comunidade/Mantedor** |
-| CEAF (download manual) | 🚫 Precisa browser | **Comunidade/Mantedor** |
-| CEPIM (download manual) | 🚫 Precisa browser | **Comunidade/Mantedor** |
-| Leniência (download manual) | 🚫 Precisa browser | **Comunidade/Mantedor** |
-| Discord bot com dados reais | ✅ Feito | Automático |
+| OpenSanctions → Neo4j | ✅ Feito (4.1M entidades) | Automático |
+| ICIJ Offshore → Neo4j | 📥 Baixado, ETL pendente | Automático |
+| PEP CGU → Neo4j | ✅ Feito (133k PEPs) | Automático |
+| CEAF → Neo4j | ✅ Feito (4.1k servidores) | Automático |
+| CEPIM → Neo4j | ✅ Feito (3.5k ONGs) | Automático |
+| Leniência → Neo4j | ✅ Feito (146 acordos) | Automático |
+| CPGF → Neo4j | ✅ Feito (9.6k transações) | Automático |
+| Viagens → Neo4j | ✅ Feito (14.2k viagens) | Automático |
+| TSE 2022+2024 → Neo4j | ✅ Feito (candidaturas+doações+bens) | Automático |
+| Discord bot com dados reais | ✅ Feito (13 ferramentas, modo agente) | Automático |
+| Telegram bot com dados reais | ✅ Feito (@EGOSin_bot, 13 ferramentas) | Automático |
 | API pública com dados reais | ✅ Feito | Automático |
+| Frontend público (bracc.egos.ia.br) | ✅ Feito (sem login) | Automático |
 
-**Resultado esperado:** ~4.2M entidades no grafo, cruzamento sanções BR × global × offshore.
+**Resultado:** 210k+ nós nativos + 4.1M OpenSanctions = maior grafo aberto de entidades BR. 10 bases carregadas, 2 bots 24/7, frontend público.
 
 ### Fase 2 — Expansão Política (Semana 3-4)
 
