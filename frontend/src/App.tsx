@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect } from "react";
-import { Navigate, Route, Routes, useParams } from "react-router";
+import { Navigate, Route, Routes, useLocation, useParams } from "react-router";
 
 import { AppShell } from "./components/common/AppShell";
 import { PublicShell } from "./components/common/PublicShell";
@@ -36,6 +36,16 @@ function GraphRedirect() {
 }
 
 export function App() {
+  // Analytics: track page views
+  const location = useLocation();
+  useEffect(() => {
+    fetch("/api/v1/analytics/pageview", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ page: location.pathname }),
+    }).catch(() => {});
+  }, [location.pathname]);
+
   const restore = useAuthStore((s) => s.restore);
 
   useEffect(() => {

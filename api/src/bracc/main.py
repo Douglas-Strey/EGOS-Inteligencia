@@ -15,6 +15,7 @@ from bracc.middleware.cpf_masking import CPFMaskingMiddleware
 from bracc.middleware.rate_limit import limiter
 from bracc.middleware.security_headers import SecurityHeadersMiddleware
 from bracc.routers import (
+    analytics,
     auth,
     baseline,
     chat,
@@ -79,6 +80,7 @@ app.include_router(baseline.router)
 app.include_router(investigation.router)
 app.include_router(investigation.shared_router)
 app.include_router(chat.router)
+app.include_router(analytics.router)
 
 
 @app.get("/health")

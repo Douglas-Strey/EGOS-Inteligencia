@@ -370,22 +370,25 @@
 > **Status:** Frontend JA TEM 8 paginas funcionais + Journey. Falta auth backend + feed comunitario.
 > **Arquivos:** `frontend/src/pages/Dashboard.tsx`, `Investigations.tsx`, `SharedInvestigation.tsx`, `Search.tsx`, `EntityAnalysis.tsx`, `GraphExplorer.tsx`, `Patterns.tsx`, `Baseline.tsx`
 
-### TASK-048: Chatbot Investigativo — 8 Tools + Transparência ✅ (02/03/2026)
-- [x] web_search: busca DuckDuckGo HTML (sem API key) para notícias, denúncias, investigações
+### TASK-048: Chatbot Investigativo — 11 Tools + Transparência ✅ (02/03/2026)
+- [x] web_search: DuckDuckGo HTML (notícias, denúncias, investigações)
 - [x] search_emendas: emendas parlamentares por município (TransfereGov API)
-- [x] search_transferencias: transferências federais/convênios por município (TransfereGov API)
-- [x] search_ceap: gastos CEAP de deputados (Dados Abertos da Câmara — por nome ou por UF)
-- [x] search_pep_city: PEPs por cidade (deputados do estado + web search de políticos locais)
-- [x] System prompt investigativo: cross-reference, caminho do dinheiro, busca por cidade
-- [x] Max rounds 4→6, max tokens 800→1200
-- [x] Testado: Uberlândia, Patos de Minas, CEAP MG (Aécio, Janones, etc.)
-- [x] search_gazettes: diários oficiais municipais (Querido Diário API — 510+ cidades)
+- [x] search_transferencias: transferências federais/convênios (TransfereGov API)
+- [x] search_ceap: gastos CEAP de deputados (Câmara API — por nome ou UF)
+- [x] search_pep_city: PEPs por cidade (deputados + web search políticos locais)
+- [x] search_gazettes: diários oficiais municipais (Querido Diário — 510+ cidades)
 - [x] cnpj_info: razão social, sócios, capital social, CNAE por CNPJ
-- [x] 10 tools total (3 grafo + 7 transparência/web)
-- [ ] Portal da Transparência API key (registro gratuito — mais dados com chave)
-- [ ] DataJud (processos judiciais) — futuro
+- [x] search_votacoes: votações nominais (como cada deputado votou) — inspirado De Olho em Você
+- [x] System prompt investigativo: cross-reference, puxar o fio, caminho do dinheiro
+- [x] Suggestions: recuperações judiciais, supersalários, fornecedores, investigações
+- [x] Max rounds 4→6, max tokens 800→1200
+- [x] 11 tools total (3 grafo + 8 transparência/web)
+- [ ] Portal da Transparência API key (issue #25)
+- [ ] DataJud processos judiciais (issue #26)
+- [ ] ReceitaWS/BrasilAPI CNPJ premium (issue #27)
+- [ ] SerpAPI/Brave Search premium (issue #28)
 > **Arquivos:** `api/src/bracc/services/transparency_tools.py`, `api/src/bracc/routers/chat.py`
-> **APIs usadas:** DuckDuckGo HTML, TransfereGov, Dados Abertos da Câmara, Querido Diário (todas gratuitas, sem API key)
+> **APIs:** DuckDuckGo, TransfereGov, Câmara dos Deputados, Querido Diário (todas gratuitas, sem API key)
 
 ### TASK-049: Avaliação Unikraft + ESAA ✅ (02/03/2026)
 - [x] Unikraft avaliado: NÃO aplicável (unikernels para microserviços stateless, nosso stack é Docker + Neo4j + Python)
@@ -393,6 +396,32 @@
 - [ ] Implementar event sourcing no egos-lab agent runtime (inspirado ESAA) — P2
 > **Unikraft:** github.com/unikraft/unikraft — 4.1k★. Boot em ms, footprint mínimo. Não roda Neo4j/Redis.
 > **ESAA:** github.com/elzobrito/ESAA — Event Sourcing for Autonomous Agents. Append-only .jsonl, SHA-256 verified projections, contracts YAML.
+
+### TASK-050: Observabilidade — Analytics + Error Tracking ✅ (02/03/2026)
+- [x] Self-hosted analytics: `/api/v1/analytics/pageview` + `/api/v1/analytics/summary`
+- [x] Redis-backed: page views por dia, unique visitors (IP hash), hourly, 7-day history
+- [x] Frontend tracking: App.tsx useLocation → POST pageview em cada navegação
+- [x] Microsoft Clarity placeholder no index.html (precisa project ID)
+- [ ] Criar projeto no clarity.microsoft.com e ativar (session recordings, heatmaps)
+- [ ] Sentry para error tracking (ou self-hosted alternative)
+> **Arquivos:** `api/src/bracc/routers/analytics.py`, `frontend/src/App.tsx`, `frontend/index.html`
+
+### TASK-051: Avaliação De Olho em Você + Mission Control ✅ (02/03/2026)
+- [x] De Olho em Você (deolhoemvoce.com.br): monitora emendas Pix, CEAP, votações
+- [x] Aprendizado: adicionamos search_votacoes (como eles têm), Flock analytics (similar ao nosso self-hosted)
+- [x] Vantagem deles: per-deputy profiles visuais, Emendas Pix específicas, AdSense
+- [x] Vantagem nossa: Neo4j graph, CNPJ/sócios, gazette search, AI chatbot, open-source
+- [x] Mission Control (builderz-labs): agent orchestration dashboard
+- [x] Relevante para egos-lab (23 agents), NÃO para EGOS Inteligência
+- [x] Ideias: cost tracking por agente, GitHub Issues sync, Kanban board
+> **Similares avaliados:** comovotou.org, deolhonodeputado.app.br, Mika-IO/deolho
+
+### TASK-052: Daily Update Policy ✅ (02/03/2026)
+- [x] Documento criado: `docs/DAILY_UPDATE_POLICY.md`
+- [x] Regra: 1 post/dia contendo tudo, exceto updates "importantes" (ver critérios)
+- [x] Critérios de "importante": nova fonte de dados, feature UX, marco, incidente, contribuição externa
+- [x] Template de post diário definido
+- [x] Canais: Telegram, Discord, Website timeline
 
 ### TASK-043: Gem Hunter v2 — Melhorar Busca de Projetos ⏳ (P2)
 - [x] Adicionar keywords semanticas: "accountability", "civic tech", "open government"
@@ -414,11 +443,13 @@
 |---|---|---|
 | **Nós no grafo** | 317.583 | 02/03/2026 |
 | **Relacionamentos** | 34.507 | 02/03/2026 |
-| **Issues GitHub abertas** | 23 | 02/03/2026 |
-| **Tasks concluídas** | 30/49 | 02/03/2026 |
-| **ETL Status** | Phase 1 em andamento | 02/03/2026 |
+| **Issues GitHub abertas** | 27 | 02/03/2026 |
+| **Tasks concluídas** | 33/52 | 02/03/2026 |
+| **Chatbot Tools** | 11 (3 grafo + 8 transparência) | 02/03/2026 |
+| **ETL Status** | Phase 1 em andamento (10%) | 02/03/2026 |
 | **Website** | inteligencia.egos.ia.br (SSL ✅) | 02/03/2026 |
-| **Projetos Gem Hunter** | 9 encontrados | 02/03/2026 |
+| **Analytics** | Self-hosted + Clarity (pending) | 02/03/2026 |
+| **Projetos Gem Hunter** | 20+ avaliados | 02/03/2026 |
 
 ---
 
