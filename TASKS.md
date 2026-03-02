@@ -566,6 +566,25 @@
 > **Conceito Mycelium:** Cada ação do sistema é um evento auditável — transparência total.
 > **Arquivos:** `api/src/bracc/routers/activity.py`, `frontend/src/pages/Activity.tsx`
 
+### TASK-071: Eagle Eye Gazette Monitor ✅ (02/03/2026)
+- [x] Backend: `gazette_monitor.py` com `/api/v1/monitor/gazettes/scan` + `/patterns`
+- [x] 8 padrões investigativos: dispensa, inexigibilidade, aditivo, emergência, sobrepreço, tomada de contas, sanção, licitação fracassada
+- [x] 10 cidades SP com dados no Querido Diário (Botucatu, Santos, Campinas, etc.)
+- [x] Alertas auto-logados no Activity Feed
+- [x] Testado: 23 alertas em Botucatu em 7 dias
+- [x] Bridge Eagle Eye (egos-lab) ↔ EGOS Intel (produção)
+> **Próximo:** Cron automático + dashboard de alertas + mais cidades
+> **Arquivo:** `api/src/bracc/routers/gazette_monitor.py`
+
+### TASK-072: GitGuardian Fix + Security Hardening ✅ (02/03/2026)
+- [x] Incidente: Brave API key vazou em `apps/openclaw/config.json.bak.1` (EGOSv5 repo)
+- [x] Key rotacionada pelo usuário
+- [x] `.gitignore`: adicionado `*.bak`, `*.bak.*`, `*.backup`, `*.old`, `config.json.bak*`
+- [x] `security_scan.ts`: +5 padrões (Brave BSA..., JSON apiKey/token, Bearer, backup files)
+- [x] Pre-commit agora bloqueia: backup files + 13 padrões de secrets + entropy check
+- [x] Regras de deploy documentadas em memória (docker rebuild para novos módulos)
+> **Root cause:** .bak file não estava no .gitignore
+
 ### TASK-043: Gem Hunter v2 — Melhorar Busca de Projetos ⏳ (P2)
 - [x] Adicionar keywords semanticas: "accountability", "civic tech", "open government"
 - [x] Busca automatizada via GitHub Search API (5 categorias, 02/03/2026)
@@ -587,7 +606,7 @@
 | **Nós no grafo** | 317.583 | 02/03/2026 |
 | **Relacionamentos** | 34.507 | 02/03/2026 |
 | **Issues GitHub abertas** | 27 | 02/03/2026 |
-| **Tasks concluídas** | 51/70 | 02/03/2026 |
+| **Tasks concluídas** | 53/72 | 02/03/2026 |
 | **Chatbot Tools** | 18 (3 grafo + 8 livres + 6 Portal + 1 DataJud) | 02/03/2026 |
 | **ETL Status** | Phase 1 file 6/10 (15%) — Contabo CPU | 02/03/2026 |
 | **Website** | inteligencia.egos.ia.br (SSL ✅) | 02/03/2026 |
