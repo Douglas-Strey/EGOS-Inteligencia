@@ -412,3 +412,84 @@ async def tool_cnpj_info(cnpj: str) -> dict[str, Any]:
         "dica": "Use search_entities com o nome dos sócios para encontrar conexões no grafo. Use search_gazettes com o CNPJ para ver menções em diários oficiais.",
         "fonte": "Querido Diário (CNPJ) + Receita Federal",
     }
+
+
+
+async def tool_search_votacoes(parlamentar: str = "", proposicao: str = "", ano: int = 2024) -> dict[str, Any]:
+    """Search roll call votes (votações nominais) from Câmara dos Deputados API."""
+    results: list[dict[str, Any]] = []
+    try:
+        async with httpx.AsyncClient(timeout=20.0) as client:
+            if parlamentar:
+                # Find deputy first
+                dep_url = f"https://dadosabertos.camara.leg.br/api/v2/deputados?nome={quote_plus(parlamentar)}&ordem=ASC&ordenarPor=nome"
+                resp = await client.get(dep_url, headers={"Accept": "application/json"})
+                if resp.status_code == 200:
+                    deps = resp.json().get("dados", [])
+                    for dep in deps[:2]:
+                        dep_id = dep.get("id")
+                        dep_name = dep.get("nome", "")
+                        # Get recent votes
+                        # First get recent votações
+                        vot_url = f"https://dadosabertos.camara.leg.br/api/v2/votacoes?ordem=DESC&ordenarPor=dataHoraRegistro&itens=5"
+                        vot_resp = await client.get(vot_url, headers={"Accept": "application/json"})
+                        if vot_resp.status_code == 200:
+                            votacoes = vot_resp.json().get("dados", [])
+                            for vot in votacoes[:5]:
+                                vot_id = vot.get("id", "")
+                                # Check how this deputy voted
+                                votos_url = f"https://dadosabertos.camara.leg.br/api/v2/votacoes/{vot_id}/votos"
+                                votos_resp = await client.get(votos_url, headers={"Accept": "application/json"})
+                                if votos_resp.status_code == 200:
+                                    votos = votos_resp.json().get("dados", [])
+                                    dep_voto = next((v for v in votos if v.get("deputado_", {}).get("id") == dep_id), None)
+                                    if dep_voto:
+                                        results.append({
+                                            "deputado": dep_name,
+                                            "votacao": vot.get("descricao", "")[:150],
+                                            "data": vot.get("dataHoraRegistro", "")[:10],
+                                            "voto": dep_voto.get("tipoVoto", ""),
+                                            "proposicao": vot.get("proposicao_", {}).get("ementa", "")[:200] if vot.get("proposicao_") else "",
+                                        })
+            else:
+                # List recent votações
+                vot_url = f"https://dadosabertos.camara.leg.br/api/v2/votacoes?ordem=DESC&ordenarPor=dataHoraRegistro&itens=10"
+                resp = await client.get(vot_url, headers={"Accept": "application/json"})
+                if resp.status_code == 200:
+                    votacoes = resp.json().get("dados", [])
+                    for vot in votacoes[:10]:
+                        # Count votes
+                        vot_id = vot.get("id", "")
+                        sim = nao = abst = 0
+                        votos_url = f"https://dadosabertos.camara.leg.br/api/v2/votacoes/{vot_id}/votos"
+                        votos_resp = await client.get(votos_url, headers={"Accept": "application/json"})
+                        if votos_resp.status_code == 200:
+                            votos = votos_resp.json().get("dados", [])
+                            for v in votos:
+                                tipo = v.get("tipoVoto", "")
+                                if tipo == "Sim":
+                                    sim += 1
+                                elif tipo in ("Não", "Nao"):
+                                    nao += 1
+                                else:
+                                    abst += 1
+
+                        results.append({
+                            "descricao": vot.get("descricao", "")[:200],
+                            "data": vot.get("dataHoraRegistro", "")[:10],
+                            "aprovada": vot.get("aprovacao", None),
+                            "sim": sim,
+                            "nao": nao,
+                            "abstencoes": abst,
+                        })
+
+    except Exception as e:
+        logger.warning("Votacoes search failed: %s", e)
+
+    return {
+        "parlamentar": parlamentar,
+        "ano": ano,
+        "votacoes": results,
+        "fonte": "Dados Abertos da Câmara dos Deputados (votações nominais)",
+        "dica": "Use com o nome de um deputado para ver como ele votou em cada proposição.",
+    }

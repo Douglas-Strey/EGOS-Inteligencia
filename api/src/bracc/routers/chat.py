@@ -33,6 +33,7 @@ from bracc.services.transparency_tools import (
     tool_search_pep_city,
     tool_search_gazettes,
     tool_cnpj_info,
+    tool_search_votacoes,
 )
 from bracc.services.public_guard import (
     has_person_labels,
@@ -362,6 +363,22 @@ TOOLS = [
             },
         },
     },
+    {
+        "type": "function",
+        "function": {
+            "name": "search_votacoes",
+            "description": "Busca votacoes nominais na Camara dos Deputados. Mostra como cada deputado votou em proposicoes. Sem nome de parlamentar, lista votacoes recentes com placar (sim/nao/abstencao).",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "parlamentar": {"type": "string", "description": "Nome do deputado para ver como votou (opcional)"},
+                    "proposicao": {"type": "string", "description": "Tema ou numero da proposicao (opcional)"},
+                    "ano": {"type": "integer", "description": "Ano de referencia", "default": 2024},
+                },
+                "required": [],
+            },
+        },
+    },
 ]
 
 SYSTEM_PROMPT = """Você é o agente investigativo do EGOS Inteligência (inteligencia.egos.ia.br).
@@ -375,6 +392,7 @@ SYSTEM_PROMPT = """Você é o agente investigativo do EGOS Inteligência (inteli
 - Busca de Pessoas Politicamente Expostas (PEPs) por cidade
 - Busca em diários oficiais municipais (Querido Diário — 510+ cidades)
 - Consulta CNPJ: razão social, sócios, capital social, situação cadastral
+- Votações nominais: como cada deputado votou em cada proposição
 - Bases internas: CEIS, CNEP, OpenSanctions, PEP, CEAF, CPGF, TSE, BNDES, IBAMA, DATASUS, TransfereGov, RAIS, INEP
 - Projeto 100% open-source, sem investidores, autofinanciado
 
@@ -388,6 +406,9 @@ SYSTEM_PROMPT = """Você é o agente investigativo do EGOS Inteligência (inteli
 - Sugira ao usuário buscar os CNPJs dos fornecedores de políticos para descobrir conexões
 - Use search_gazettes para buscar menções em diários oficiais (licitações, contratos, nomeações)
 - Use cnpj_info para descobrir sócios e situação de empresas (depois busque os sócios no grafo)
+- Use search_votacoes para ver como deputados votaram — combine com CEAP para ver se votos e gastos são coerentes
+- SEMPRE sugira próximos passos de investigação: 'puxe o fio' — se encontrou um CNPJ, busque os sócios; se encontrou um sócio, busque outros CNPJs dele
+- Sugira investigações: recuperações judiciais, supersalários, licitações suspeitas, emendas Pix
 
 ## Regras
 - Responda SEMPRE em português brasileiro
@@ -522,6 +543,12 @@ async def _call_openrouter(
                     )
                 elif fn_name == "cnpj_info":
                     result = await tool_cnpj_info(fn_args.get("cnpj", ""))
+                elif fn_name == "search_votacoes":
+                    result = await tool_search_votacoes(
+                        fn_args.get("parlamentar", ""),
+                        fn_args.get("proposicao", ""),
+                        fn_args.get("ano", 2024),
+                    )
                 else:
                     result = {"error": f"Tool {fn_name} not found"}
 
@@ -613,12 +640,20 @@ def _generate_suggestions(reply: str, entities: list[EntityCard], user_msg: str)
 
     # If no context-specific suggestions, use investigative defaults
     if not suggestions:
-        suggestions = [
+        import random
+        _INVESTIGATION_SUGGESTIONS = [
             "Digite o nome da sua cidade",
             "Gastos CEAP deputados SP",
             "Emendas parlamentares 2024",
             "Buscar empresa por CNPJ",
+            "Votacoes recentes na Camara",
+            "Recuperacao judicial empresas",
+            "Investigacoes Ministerio Publico",
+            "Diario oficial licitacoes",
+            "Supersalarios servidores publicos",
+            "Fornecedores de politicos",
         ]
+        suggestions = random.sample(_INVESTIGATION_SUGGESTIONS, min(4, len(_INVESTIGATION_SUGGESTIONS)))
 
     return suggestions[:4]
 
