@@ -309,7 +309,36 @@
 - [x] sources.json gerado do CSV com 27 categorias
 - [x] Injetado na landing page acima do UpdatesTimeline
 - [x] Cada fonte com link para portal oficial do governo
+- [x] Paginacao: 10 fontes por pagina com botoes prev/next
 > **Arquivos:** `frontend/src/components/landing/SourceRegistry.tsx`, `frontend/public/updates/sources.json`
+
+### TASK-044: Linha do Tempo Completa + ETL Progress Widget ✅ (02/03/2026)
+- [x] UpdatesTimeline reescrito com timeline vertical (24 marcos desde fork do Bruno)
+- [x] timeline.json com todos os milestones de Jan 15 a Mar 02 2026
+- [x] Mostra 5 recentes por padrao, expansivel para todos os 24
+- [x] ETLProgress widget: barra de progresso ao vivo, auto-refresh 30s
+- [x] Endpoint /api/v1/meta/etl-progress: fase, arquivo, %, running status
+- [x] ETL usa mtime do log (container-compatible) em vez de pgrep
+> **Arquivos:** `frontend/src/components/landing/UpdatesTimeline.tsx`, `frontend/public/updates/timeline.json`, `frontend/src/components/landing/ETLProgress.tsx`, `api/src/bracc/routers/meta.py`
+
+### TASK-045: Bot Error Handling — DM Only ✅ (02/03/2026)
+- [x] Telegram: erros so enviados em chat privado (ctx.chat.type === 'private')
+- [x] Discord: erros via message.author.send() (DM), nao message.reply() (channel)
+- [x] Healthcheck v2: corrigido parsing de status (pm2 describe + awk)
+- [x] Healthcheck alertas Telegram para @ethikin no restart/failure
+> **Arquivos:** `telegram-bot.ts`, `discord-bot.ts`, `/opt/egos-bot/healthcheck.sh`
+
+### TASK-046: Diagnostico Completo do Sistema ✅ (02/03/2026)
+- [x] 14 OSINT tools registrados nos bots
+- [x] 30+ endpoints API em 10 routers
+- [x] 5 containers Docker (frontend, api, caddy, neo4j, redis)
+- [x] 2 bots PM2 (discord, telegram)
+- [x] 23 issues GitHub abertas, 0 fechadas
+- [x] ETL: CPU processing (32GB em disco), nao internet
+- [x] Relatorio Patense em /reports/patense.html (nao linkado na landing)
+- [ ] Falta: pre-commit hooks no repo EGOS-Inteligencia
+- [ ] Falta: pagina dedicada de relatorios na landing
+- [ ] Falta: rebuild da imagem Docker da API (DNS transient error, hotfix via docker cp)
 
 ### TASK-042: /app — Plataforma de Pesquisa Colaborativa ⏳ (P1)
 - [x] /app/search: Busca no grafo (JA EXISTE, public mode)
@@ -347,7 +376,7 @@
 | **Nós no grafo** | 317.583 | 02/03/2026 |
 | **Relacionamentos** | 34.507 | 02/03/2026 |
 | **Issues GitHub abertas** | 23 | 02/03/2026 |
-| **Tasks concluídas** | 21/43 | 02/03/2026 |
+| **Tasks concluídas** | 25/46 | 02/03/2026 |
 | **ETL Status** | Phase 1 em andamento | 02/03/2026 |
 | **Website** | inteligencia.egos.ia.br (SSL ✅) | 02/03/2026 |
 | **Projetos Gem Hunter** | 9 encontrados | 02/03/2026 |
