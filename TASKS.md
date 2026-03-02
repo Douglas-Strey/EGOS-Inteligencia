@@ -665,6 +665,21 @@
 | **Cost/Query** | ~$0.0006/query (~R$ 0,003) | 02/03/2026 |
 | **Custo Mensal Real** | ~$105/mês (~R$ 630) | 02/03/2026 |
 
+### TASK-090: UI Polish — Scrollbar, Reports HTML, Privacy, Sidebar ✅ (03/03/2026)
+- [x] Dark scrollbar matching site palette (scrollbar-color: bg-surface/bg-secondary)
+- [x] Reports page: cards now open HTML in new tab (removed raw MD viewer)
+- [x] 3 new HTML report pages (SUPERAR, Manaus, Recuperação Judicial) — standardized template
+- [x] Activity feed: hide search terms/entity names for user privacy
+- [x] Sidebar: fix "EGOS Inteligência" text cutoff (font-size-sm + ellipsis)
+- [x] ReportsShowcase landing: all 4 reports shown (was showing only Patense)
+- [x] PR #24 mobile responsive CSS merged + deployed
+- [x] PR #29 spam bot closed
+- [x] GitHub issues #6 + #7 closed (resolved by PR #30)
+- [x] FAQ PT-BR created (docs/pt-BR/FAQ.md, closes issue #4)
+- [x] Analytics verified: 21 unique visitors, 5270 views — REAL (Redis in-memory)
+- [ ] X.com post: API returning 503 (Twitter outage), retry later
+> **Arquivos:** `global.css`, `AppShell.module.css`, `Reports.tsx`, `Activity.tsx`, `ReportsShowcase.tsx`, 3 HTML reports
+
 ### TASK-087: Branding — EGOS Logo as Favicon + OG Image ✅ (03/03/2026)
 - [x] Generate favicon.ico (16/32/48px), favicon-16x16.png, favicon-32x32.png
 - [x] Generate apple-touch-icon.png (180x180), android-chrome (192/512)
