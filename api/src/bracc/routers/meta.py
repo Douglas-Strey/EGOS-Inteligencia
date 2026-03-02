@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends
 from neo4j import AsyncSession
 
 from bracc.dependencies import get_session
+from bracc.services.cache import cache
 from bracc.services.neo4j_service import execute_query_single
 from bracc.services.source_registry import load_source_registry, source_registry_summary
 
@@ -103,3 +104,14 @@ async def database_stats(
 async def list_sources() -> dict[str, list[dict[str, Any]]]:
     sources = [entry.to_public_dict() for entry in load_source_registry() if entry.in_universe_v1]
     return {"sources": sources}
+
+
+@router.get("/cache-stats")
+async def cache_stats() -> dict[str, Any]:
+    return cache.get_stats()
+
+
+@router.delete("/cache")
+async def flush_cache() -> dict[str, Any]:
+    count = await cache.flush()
+    return {"flushed_keys": count}

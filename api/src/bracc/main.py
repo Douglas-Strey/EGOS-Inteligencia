@@ -10,6 +10,7 @@ from slowapi.middleware import SlowAPIMiddleware
 
 from bracc.config import settings
 from bracc.dependencies import close_driver, init_driver
+from bracc.services.cache import cache
 from bracc.middleware.cpf_masking import CPFMaskingMiddleware
 from bracc.middleware.rate_limit import limiter
 from bracc.middleware.security_headers import SecurityHeadersMiddleware
@@ -40,7 +41,9 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     driver = await init_driver()
     app.state.neo4j_driver = driver
     await ensure_schema(driver)
+    await cache.connect()
     yield
+    await cache.close()
     await close_driver()
 
 

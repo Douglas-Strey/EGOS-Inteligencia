@@ -34,6 +34,7 @@ class Settings(BaseSettings):
 
     openrouter_api_key: str = ""
     ai_model: str = "google/gemini-2.0-flash-001"
+    redis_url: str = "redis://localhost:6379/0"
 
     model_config = {"env_prefix": "", "env_file": ".env"}
 

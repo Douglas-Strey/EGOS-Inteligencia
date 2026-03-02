@@ -8,6 +8,7 @@ from starlette.requests import Request
 from bracc.dependencies import get_session
 from bracc.middleware.rate_limit import limiter
 from bracc.models.entity import SourceAttribution
+from bracc.services.cache import cache
 from bracc.models.search import SearchResponse, SearchResult
 from bracc.services.neo4j_service import execute_query, sanitize_props
 from bracc.services.public_guard import (
@@ -71,6 +72,11 @@ async def search_entities(
     type_filter = entity_type.lower() if entity_type else None
     search_query = _build_search_query(q)
 
+    cache_params = {"q": q, "type": type_filter, "page": page, "size": size}
+    cached = await cache.get("search", cache_params)
+    if cached is not None:
+        return SearchResponse(**cached)
+
     records = await execute_query(
         session,
         "search",
@@ -111,9 +117,11 @@ async def search_entities(
             exposure_tier=infer_exposure_tier(labels),
         ))
 
-    return SearchResponse(
+    response = SearchResponse(
         results=results,
         total=len(results),
         page=page,
         size=size,
     )
+    await cache.set("search", cache_params, response.model_dump())
+    return response
