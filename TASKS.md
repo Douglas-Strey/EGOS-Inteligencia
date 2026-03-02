@@ -304,6 +304,34 @@
 - [ ] Pipeline: erro detectado -> agente analisa -> sugere fix -> cria PR
 > **Inspiracao:** OpenClaw molt.sh self-healing pattern, RokoOfficial/OPENBOT
 
+### TASK-041: SourceRegistry — Transparencia Total no Website ✅ (02/03/2026)
+- [x] SourceRegistry component com 108 fontes, links diretos, categorias, tiers, filtros
+- [x] sources.json gerado do CSV com 27 categorias
+- [x] Injetado na landing page acima do UpdatesTimeline
+- [x] Cada fonte com link para portal oficial do governo
+> **Arquivos:** `frontend/src/components/landing/SourceRegistry.tsx`, `frontend/public/updates/sources.json`
+
+### TASK-042: /app — Plataforma de Pesquisa Colaborativa ⬜ (P1 — Design)
+- [ ] Auth: Login com Google/GitHub para criar conta
+- [ ] /app/search: Busca no grafo (ja existe)
+- [ ] /app/investigations: Caderno de pesquisa do usuario (salvar queries, anotar conexoes)
+- [ ] /app/public: Feed de pesquisas publicadas pela comunidade
+- [ ] Incentivo: Badge "Pesquisador Cidadao" para quem publica pesquisas
+- [ ] Cross-link: Quando pesquisas de usuarios diferentes encontram mesmas entidades, sistema destaca
+- [ ] Feedback loop: Conexoes descobertas por usuarios que o sistema nao tinha -> aprender, melhorar ETL
+- [ ] Somente dados publicos, verificaveis. Sem afirmacoes — apenas padroes e sinais
+- [ ] Historico de pesquisas do usuario (privado por padrao, publico se optar)
+> **Visao:** Cada pesquisa de usuario gera valor para a comunidade. O sistema aprende com conexoes que usuarios descobrem manualmente. Isso melhora o grafo, fecha gaps, e cria inteligencia coletiva.
+
+### TASK-043: Gem Hunter v2 — Melhorar Busca de Projetos ⬜ (P2)
+- [ ] Adicionar keywords semanticas: "accountability", "civic tech", "open government"
+- [ ] Monitorar repos novos com GitHub Search API (cron semanal)
+- [ ] Avaliar projetos encontrados: stars, commits recentes, relevancia
+- [ ] Manter registro de projetos avaliados (evitar re-avaliar)
+- [ ] LMCache avaliado: KV cache para LLM self-hosted (vLLM/SGLang) — NAO aplicavel (usamos API OpenRouter)
+- [ ] Buscar projetos de caching aplicaveis a Neo4j/API (nao LLM inference)
+> **Projetos avaliados:** 9 ja encontrados + LMCache (descartado) + 3 RokoOfficial (HGR, OPENBOT, OPEN-ROKO)
+
 ---
 
 ## Métricas
@@ -313,7 +341,7 @@
 | **Nós no grafo** | 317.583 | 02/03/2026 |
 | **Relacionamentos** | 34.507 | 02/03/2026 |
 | **Issues GitHub abertas** | 23 | 02/03/2026 |
-| **Tasks concluídas** | 19/40 | 02/03/2026 |
+| **Tasks concluídas** | 21/43 | 02/03/2026 |
 | **ETL Status** | Phase 1 em andamento | 02/03/2026 |
 | **Website** | inteligencia.egos.ia.br (SSL ✅) | 02/03/2026 |
 | **Projetos Gem Hunter** | 9 encontrados | 02/03/2026 |
