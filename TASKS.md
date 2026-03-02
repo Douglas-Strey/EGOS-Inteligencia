@@ -75,7 +75,7 @@
 ### TASK-009: Patense Report v2 ✅ (02/03/2026)
 - [x] Reescrever relatório com linguagem neutra
 - [x] Completar dados BNDES (R$217M, 4 empresas, 563 operações)
-- [x] Publicar em bracc.egos.ia.br/reports/patense.html
+- [x] Publicar em inteligencia.egos.ia.br/reports/patense.html
 - [x] Persistir em frontend/public/reports/
 > **Arquivos:** `docs/showcase/patense-investigation.html`
 
@@ -208,6 +208,46 @@
 - [ ] Construir modular no egos-lab framework
 - [ ] Scanner de repos GitHub brasileiros de transparência
 - [ ] Primeiro deploy no website EGOS Inteligência
+- [x] Pesquisa inicial: 9 projetos encontrados (02/03/2026)
+> **Projetos encontrados:**
+> - `jpvss/CEAP-Playbook` — Benford + HHI para CEAP (OURO)
+> - `Pr0teus/BROS` — OSINT sources brasileiras + Neo4j
+> - `pedropberger/Julius` — Bot scraper de portais de transparência (ES)
+> - `vfpimenta/corruption-profiler` — Anomalia em gastos parlamentares
+> - `rodrigolink/benford` — Benford em dados eleitorais TSE
+> - `pedronipalhares/CVM358` — Insider trading CVM
+> - `GuiCosti/Public-Spending-Analysis` — CPGF anomalias
+> - `RenatoDev4/spending-anomalies` — AutoEncoder para gastos
+> - `Apify/brazil-government-transparency` — Scraper dados governo
+
+### TASK-031: Integrar CEAP-Playbook (Benford + HHI) ⬜
+- [ ] Adaptar `analise_benford()` para nosso backend (scipy chi-squared)
+- [ ] Adaptar HHI por fornecedor para contratos no grafo
+- [ ] Criar ETL pipeline para CEAP (Câmara API, CSV zips por ano)
+- [ ] Adicionar dicionário de dados CEAP
+- [ ] Visualização Benford no frontend (esperado vs observado)
+> **Ref:** https://github.com/jpvss/CEAP-Playbook
+
+### TASK-032: DNS inteligencia.egos.ia.br ✅ (02/03/2026)
+- [x] DNS A record criado pelo usuário
+- [x] Caddyfile atualizado (inteligencia.egos.ia.br + bracc 301 redirect)
+- [x] SSL Let's Encrypt obtido automaticamente
+- [x] Caddy reiniciado, serviço ativo
+- [x] URLs atualizadas no codebase (TASKS, ROADMAP, plans)
+- [x] CORS_ORIGINS/.env atualizados
+
+### TASK-033: Linguagem Legal — Pesquisa Pessoal ✅ (02/03/2026)
+- [x] Disclaimer atualizado: "Pesquisa pessoal com dados públicos. Padrões são sinais, não prova jurídica."
+- [x] "Investigue em profundidade" → "Pesquise em profundidade"
+- [x] "Investigações recentes" → "Pesquisas recentes"
+- [x] Feature descriptions focam em "pesquisa pessoal" e "dados públicos"
+> **Arquivos:** `frontend/src/i18n.ts`
+
+### TASK-034: Gem Hunter — Keywords de Busca ⬜
+- [ ] Implementar busca por semântica no GitHub API
+- [ ] Keywords mapeadas: CEAP, cota parlamentar, transparencia brasil, CNPJ consulta, licitacao anomalia, benford brazil, Neo4j governo, OSINT brasil, serenata amor, TCU auditoria, CGU dados
+- [ ] Engenharia reversa do EGOS Inteligência para extrair tags
+- [ ] Monitoramento periódico de novos repos
 
 ---
 
@@ -218,8 +258,10 @@
 | **Nós no grafo** | 317.583 | 02/03/2026 |
 | **Relacionamentos** | 34.507 | 02/03/2026 |
 | **Issues GitHub abertas** | 23 | 02/03/2026 |
-| **Tasks concluídas** | 7/30 | 02/03/2026 |
+| **Tasks concluídas** | 12/34 | 02/03/2026 |
 | **ETL Status** | Phase 1 em andamento | 02/03/2026 |
+| **Website** | inteligencia.egos.ia.br (SSL ✅) | 02/03/2026 |
+| **Projetos Gem Hunter** | 9 encontrados | 02/03/2026 |
 
 ---
 

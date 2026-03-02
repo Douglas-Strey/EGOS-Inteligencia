@@ -30,7 +30,7 @@ Cada cidadao brasileiro conhece melhor sua cidade, seus politicos, suas empresas
 Quando o bot consulta dados, ele gera um **permalink** do resultado:
 
 ```
-https://bracc.egos.ia.br/r/abc123
+https://inteligencia.egos.ia.br/r/abc123
 ```
 
 O relatorio contem:

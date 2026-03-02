@@ -8,7 +8,7 @@ const resources = {
         title: "EGOS Inteligência",
         subtitle: "Plataforma aberta de cruzamento de dados públicos brasileiros",
         disclaimer:
-          "Dados de registros públicos. Não constitui acusação.",
+          "Pesquisa pessoal com dados públicos. Padrões são sinais, não prova jurídica. Não constitui acusação.",
       },
       landing: {
         hero: "Siga o dinheiro público",
@@ -30,9 +30,9 @@ const resources = {
           patterns: "Detecte padrões",
           patternsDesc:
             "Algoritmos cruzam dados de múltiplas fontes para encontrar padrões em contratos, doações e sanções.",
-          investigations: "Investigue em profundidade",
+          investigations: "Pesquise em profundidade",
           investigationsDesc:
-            "Monte dossiês com anotações, etiquetas e exportação. Atribuição de fonte em cada dado.",
+            "Organize sua pesquisa pessoal com anotações, etiquetas e exportação. Fonte atribuída em cada dado público.",
         },
         howItWorks: {
           sectionLabel: "Como funciona",
@@ -109,9 +109,9 @@ const resources = {
       dashboard: {
         welcome: "Painel",
         quickSearch: "Busca rápida",
-        recentInvestigations: "Investigações recentes",
+        recentInvestigations: "Pesquisas recentes",
         continueInvestigation: "Continuar",
-        noRecent: "Nenhuma investigação recente.",
+        noRecent: "Nenhuma pesquisa recente.",
         quickStats: "Estatísticas",
       },
       nav: {
