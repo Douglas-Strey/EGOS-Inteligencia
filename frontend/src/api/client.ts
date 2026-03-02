@@ -366,6 +366,30 @@ export function exportInvestigation(investigationId: string): Promise<Blob> {
   });
 }
 
+// --- Chat ---
+
+export interface ChatEntityCard {
+  id: string;
+  type: string;
+  name: string;
+  properties: Record<string, unknown>;
+  connections: number;
+  sources: string[];
+}
+
+export interface ChatResponse {
+  reply: string;
+  entities: ChatEntityCard[];
+  suggestions: string[];
+}
+
+export function sendChatMessage(message: string): Promise<ChatResponse> {
+  return apiFetch<ChatResponse>("/api/v1/chat", {
+    method: "POST",
+    body: JSON.stringify({ message }),
+  });
+}
+
 // --- Stats ---
 
 export interface StatsResponse {

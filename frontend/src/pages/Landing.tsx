@@ -9,8 +9,9 @@ import {
   InvestigationIcon,
   PatternIcon,
 } from "@/components/landing/FeatureIcons";
+import { ChatInterface } from "@/components/chat/ChatInterface";
 import { IS_PATTERNS_ENABLED, IS_PUBLIC_MODE } from "@/config/runtime";
-import { HeroGraph } from "@/components/landing/HeroGraph";
+
 import { NetworkAnimation } from "@/components/landing/NetworkAnimation";
 import { StatsBar } from "@/components/landing/StatsBar";
 
@@ -268,7 +269,7 @@ export function Landing() {
           </div>
 
           <div className={styles.heroRight}>
-            <HeroGraph />
+            <ChatInterface embedded />
           </div>
         </div>
       </section>

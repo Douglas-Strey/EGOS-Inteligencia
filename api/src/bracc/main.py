@@ -16,6 +16,7 @@ from bracc.middleware.security_headers import SecurityHeadersMiddleware
 from bracc.routers import (
     auth,
     baseline,
+    chat,
     entity,
     graph,
     investigation,
@@ -44,8 +45,8 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
 
 app = FastAPI(
-    title="BRACC API",
-    description="Brazilian public data graph analysis tool",
+    title="EGOS Inteligência API",
+    description="Plataforma aberta de cruzamento de dados públicos brasileiros",
     version="0.1.0",
     lifespan=lifespan,
     redirect_slashes=False,
@@ -74,6 +75,7 @@ app.include_router(patterns.router)
 app.include_router(baseline.router)
 app.include_router(investigation.router)
 app.include_router(investigation.shared_router)
+app.include_router(chat.router)
 
 
 @app.get("/health")
