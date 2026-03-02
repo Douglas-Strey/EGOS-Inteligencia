@@ -9,6 +9,7 @@ import {
   InvestigationIcon,
   PatternIcon,
 } from "@/components/landing/FeatureIcons";
+import { SourceRegistry } from "@/components/landing/SourceRegistry";
 import { UpdatesTimeline } from "@/components/landing/UpdatesTimeline";
 import { ChatInterface } from "@/components/chat/ChatInterface";
 import { IS_PATTERNS_ENABLED, IS_PUBLIC_MODE } from "@/config/runtime";
@@ -364,6 +365,8 @@ export function Landing() {
           </div>
         </div>
       </section>
+
+      <SourceRegistry />
 
       <UpdatesTimeline />
 
