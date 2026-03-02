@@ -9,6 +9,7 @@ Tools:
 """
 
 import logging
+import os
 import re
 from typing import Any
 from urllib.parse import quote_plus
@@ -29,25 +30,46 @@ _PT_BASE = "https://api.portaldatransparencia.gov.br/api-de-dados"
 _TG_BASE = "https://api.transferegov.gestao.gov.br"
 
 
-async def tool_web_search(query: str, max_results: int = 5) -> list[dict[str, str]]:
-    """Search the web using DuckDuckGo HTML (no API key).
-    Returns list of {title, url, snippet}."""
+async def tool_web_search(query: str, max_results: int = 8) -> list[dict[str, str]]:
+    """Web search: Brave Search API primary, DuckDuckGo fallback."""
     results: list[dict[str, str]] = []
+    brave_key = os.environ.get("BRAVE_API_KEY", "")
+
+    # Try Brave Search first
+    if brave_key:
+        try:
+            async with httpx.AsyncClient(timeout=15.0) as client:
+                resp = await client.get(
+                    "https://api.search.brave.com/res/v1/web/search",
+                    params={"q": query, "count": max_results, "search_lang": "pt-br"},
+                    headers={"Accept": "application/json", "X-Subscription-Token": brave_key},
+                )
+                if resp.status_code == 200:
+                    data = resp.json()
+                    for r in data.get("web", {}).get("results", [])[:max_results]:
+                        results.append({
+                            "title": r.get("title", ""),
+                            "url": r.get("url", ""),
+                            "snippet": r.get("description", "")[:300],
+                        })
+                    if results:
+                        return results
+        except Exception as e:
+            logger.warning("Brave search failed, falling back to DDG: %s", e)
+
+    # Fallback: DuckDuckGo HTML
     url = f"https://html.duckduckgo.com/html/?q={quote_plus(query)}"
     try:
         async with httpx.AsyncClient(timeout=15.0, follow_redirects=True) as client:
             resp = await client.get(url, headers=_HEADERS)
             html = resp.text
 
-        # Parse results from DDG HTML
-        # Each result is in <div class="result__body">
         snippets = re.findall(
             r'<a[^>]+class="result__a"[^>]+href="([^"]+)"[^>]*>(.+?)</a>.*?'
             r'<a[^>]+class="result__snippet"[^>]*>(.+?)</a>',
             html, re.DOTALL
         )
         for href, title, snippet in snippets[:max_results]:
-            # DDG redirects through //duckduckgo.com/l/?uddg=...
             actual_url = href
             if "uddg=" in href:
                 m = re.search(r"uddg=([^&]+)", href)
@@ -60,7 +82,7 @@ async def tool_web_search(query: str, max_results: int = 5) -> list[dict[str, st
                 "snippet": re.sub(r"<[^>]+>", "", snippet).strip()[:300],
             })
     except Exception as e:
-        logger.warning("Web search failed: %s", e)
+        logger.warning("DDG search also failed: %s", e)
         results.append({"title": "Erro na busca", "url": "", "snippet": str(e)[:200]})
 
     return results
@@ -498,7 +520,7 @@ async def tool_search_votacoes(parlamentar: str = "", proposicao: str = "", ano:
 
 # ─── Portal da Transparência (with API key) ───────────────────────────
 
-PORTAL_API_KEY = "f6341a2372b17d0fe0657c616aa68fb1"
+PORTAL_API_KEY = os.environ.get("PORTAL_TRANSPARENCIA_API_KEY", "")
 PORTAL_BASE = "https://api.portaldatransparencia.gov.br/api-de-dados"
 PORTAL_HEADERS = {
     "Accept": "application/json",
@@ -783,7 +805,7 @@ async def tool_search_sancoes(cnpj: str = "", nome: str = "") -> dict[str, Any]:
 
 # ─── DataJud (Processos Judiciais - CNJ) ──────────────────────────────
 
-DATAJUD_API_KEY = "cDZHYzlZa0JadVREZDJCendQbXY6SkJlTzNjLV9TRENyQk1RdnFKZGRQdw=="
+DATAJUD_API_KEY = os.environ.get("DATAJUD_API_KEY", "")
 DATAJUD_BASE = "https://api-publica.datajud.cnj.jus.br"
 DATAJUD_HEADERS = {
     "Authorization": f"APIKey {DATAJUD_API_KEY}",

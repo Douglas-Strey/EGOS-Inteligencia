@@ -18,6 +18,7 @@ from bracc.routers import (
     analytics,
     auth,
     baseline,
+    monitor,
     chat,
     entity,
     graph,
@@ -81,6 +82,7 @@ app.include_router(investigation.router)
 app.include_router(investigation.shared_router)
 app.include_router(chat.router)
 app.include_router(analytics.router)
+app.include_router(monitor.router)
 
 
 @app.get("/health")

@@ -1,0 +1,110 @@
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+.title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #e0e0e0;
+  margin-bottom: 0.25rem;
+}
+.subtitle {
+  color: #888;
+  margin-bottom: 2rem;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+.card {
+  background: #1a1d1e;
+  border: 1px solid #2a2d2e;
+  border-radius: 8px;
+  padding: 1.25rem;
+}
+.cardLabel {
+  font-size: 0.8rem;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+}
+.cardValue {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #4ade80;
+}
+.sectionTitle {
+  font-size: 1.1rem;
+  color: #ccc;
+  margin: 2rem 0 1rem;
+  border-bottom: 1px solid #2a2d2e;
+  padding-bottom: 0.5rem;
+}
+.chartContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.barGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.barLabel {
+  width: 50px;
+  text-align: right;
+  font-size: 0.8rem;
+  color: #888;
+  font-family: monospace;
+}
+.barTrack {
+  flex: 1;
+  height: 20px;
+  background: #1a1d1e;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.barFill {
+  height: 100%;
+  background: linear-gradient(90deg, #4ade80, #22d3ee);
+  border-radius: 4px;
+  min-width: 2px;
+  transition: width 0.3s ease;
+}
+.barValue {
+  width: 40px;
+  text-align: left;
+  font-size: 0.85rem;
+  color: #ccc;
+  font-family: monospace;
+}
+.tableContainer {
+  overflow-x: auto;
+}
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.table th, .table td {
+  text-align: left;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid #2a2d2e;
+}
+.table th {
+  color: #888;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+}
+.pagePath {
+  font-family: monospace;
+  font-size: 0.85rem;
+  color: #4ade80;
+  max-width: 500px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
