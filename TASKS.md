@@ -379,10 +379,13 @@
 - [x] System prompt investigativo: cross-reference, caminho do dinheiro, busca por cidade
 - [x] Max rounds 4→6, max tokens 800→1200
 - [x] Testado: Uberlândia, Patos de Minas, CEAP MG (Aécio, Janones, etc.)
+- [x] search_gazettes: diários oficiais municipais (Querido Diário API — 510+ cidades)
+- [x] cnpj_info: razão social, sócios, capital social, CNAE por CNPJ
+- [x] 10 tools total (3 grafo + 7 transparência/web)
 - [ ] Portal da Transparência API key (registro gratuito — mais dados com chave)
 - [ ] DataJud (processos judiciais) — futuro
 > **Arquivos:** `api/src/bracc/services/transparency_tools.py`, `api/src/bracc/routers/chat.py`
-> **APIs usadas:** DuckDuckGo HTML, TransfereGov, Dados Abertos da Câmara (todas gratuitas, sem API key)
+> **APIs usadas:** DuckDuckGo HTML, TransfereGov, Dados Abertos da Câmara, Querido Diário (todas gratuitas, sem API key)
 
 ### TASK-049: Avaliação Unikraft + ESAA ✅ (02/03/2026)
 - [x] Unikraft avaliado: NÃO aplicável (unikernels para microserviços stateless, nosso stack é Docker + Neo4j + Python)
