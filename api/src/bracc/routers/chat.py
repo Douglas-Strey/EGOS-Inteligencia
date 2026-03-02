@@ -293,8 +293,8 @@ async def _call_openrouter(
     headers = {
         "Authorization": f"Bearer {settings.openrouter_api_key}",
         "Content-Type": "application/json",
-        "HTTP-Referer": f"https://{settings.cors_origins.split(',')[0].strip().replace('http://', '').replace('https://', '')}",
-        "X-Title": "EGOS Inteligência",
+        "HTTP-Referer": "https://inteligencia.egos.ia.br",
+        "X-Title": "EGOS Inteligencia",
     }
 
     payload = {
