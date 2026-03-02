@@ -125,12 +125,12 @@ export function Reports() {
             <h3 className={styles.reportTitle}>{r.title}</h3>
             <p className={styles.reportScenario}>{r.scenario}</p>
             <div className={styles.reportTags}>
-              {r.sources.map((s) => (
+              {(r.sources ?? []).map((s) => (
                 <span key={s} className={styles.tag}>{s}</span>
               ))}
             </div>
             <div className={styles.reportEntities}>
-              {r.entities.slice(0, 3).map((e) => (
+              {(r.entities ?? []).slice(0, 3).map((e) => (
                 <span key={e} className={styles.entity}>{e}</span>
               ))}
             </div>

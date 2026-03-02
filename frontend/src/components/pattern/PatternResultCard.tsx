@@ -15,7 +15,7 @@ export function PatternResultCard({ result, onEntityClick }: PatternResultCardPr
       <div className={styles.header}>
         <span className={styles.patternName}>{result.pattern_name}</span>
         <span className={styles.sources}>
-          {result.sources.map((s) => (
+          {(result.sources ?? []).map((s) => (
             <SourceBadge key={s.database} source={s.database} />
           ))}
         </span>
@@ -35,9 +35,9 @@ export function PatternResultCard({ result, onEntityClick }: PatternResultCardPr
           </div>
         ))}
       </div>
-      {result.entity_ids.length > 0 && (
+      {(result.entity_ids ?? []).length > 0 && (
         <div className={styles.entities}>
-          {result.entity_ids.map((id) => (
+          {(result.entity_ids ?? []).map((id) => (
             <button
               key={id}
               className={styles.entityLink}

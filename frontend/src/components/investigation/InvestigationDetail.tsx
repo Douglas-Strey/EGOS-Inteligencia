@@ -165,7 +165,7 @@ export function InvestigationDetail() {
           </button>
         </div>
         <div className={styles.entityList}>
-          {investigation.entity_ids.map((eid) => (
+          {(investigation.entity_ids ?? []).map((eid) => (
             <span key={eid} className={styles.entityChip}>
               {eid}
               <button

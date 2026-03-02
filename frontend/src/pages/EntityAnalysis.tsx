@@ -392,7 +392,7 @@ export function EntityAnalysis() {
                   >
                     <span className={styles.invTitle}>{inv.title}</span>
                     <span className={styles.invCount}>
-                      {inv.entity_ids.length} {t("investigation.entities")}
+                      {(inv.entity_ids ?? []).length} {t("investigation.entities")}
                     </span>
                   </button>
                 ))}

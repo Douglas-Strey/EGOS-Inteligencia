@@ -80,7 +80,7 @@ export function InvestigationPanel() {
           >
             <span className={styles.itemTitle}>{inv.title}</span>
             <div className={styles.itemMeta}>
-              <span>{inv.entity_ids.length} {t("common.connections")}</span>
+              <span>{(inv.entity_ids ?? []).length} {t("common.connections")}</span>
               <span>{new Date(inv.created_at).toLocaleDateString()}</span>
             </div>
           </button>

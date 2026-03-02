@@ -102,7 +102,7 @@ export function Dashboard() {
               >
                 <span className={styles.invTitle}>{inv.title}</span>
                 <span className={styles.invMeta}>
-                  {inv.entity_ids.length} {t("common.connections")} &middot; {new Date(inv.updated_at).toLocaleDateString()}
+                  {(inv.entity_ids ?? []).length} {t("common.connections")} &middot; {new Date(inv.updated_at).toLocaleDateString()}
                 </span>
               </button>
             ))}

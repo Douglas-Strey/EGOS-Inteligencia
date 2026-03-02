@@ -39,7 +39,7 @@ export function SearchResults({ results }: SearchResultsProps) {
               )}
             </Link>
             <div className={styles.sources}>
-              {result.sources.map((source) => (
+              {(result.sources ?? []).map((source) => (
                 <SourceBadge key={source.database} source={source.database} />
               ))}
             </div>

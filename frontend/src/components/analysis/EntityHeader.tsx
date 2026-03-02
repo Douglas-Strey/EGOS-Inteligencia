@@ -41,7 +41,7 @@ function EntityHeaderInner({
   const typeColor = entityColors[entity.type] ?? "var(--text-muted)";
 
   const connectionCount = exposure?.factors.find((f) => f.name === "connections")?.value;
-  const sourceCount = exposure?.factors.find((f) => f.name === "sources")?.value ?? entity.sources.length;
+  const sourceCount = exposure?.factors.find((f) => f.name === "sources")?.value ?? (entity.sources ?? []).length;
   const totalMoney = exposure?.factors.find((f) => f.name === "financial");
 
   return (
@@ -69,7 +69,7 @@ function EntityHeaderInner({
       )}
 
       <div className={styles.sourceBadges}>
-        {entity.sources.map((s) => (
+        {(entity.sources ?? []).map((s) => (
           <span key={s.database} className={styles.sourcePill}>
             {s.database}
           </span>

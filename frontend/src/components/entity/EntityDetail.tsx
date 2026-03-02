@@ -73,10 +73,10 @@ export function EntityDetail({ entityId, onClose }: EntityDetailProps) {
             ))}
           </div>
 
-          {entity.sources.length > 0 && (
+          {(entity.sources ?? []).length > 0 && (
             <div className={styles.sources}>
               <span className={styles.sourcesLabel}>{t("common.source")}:</span>
-              {entity.sources.map((s) => (
+              {(entity.sources ?? []).map((s) => (
                 <SourceBadge key={s.database} source={s.database} />
               ))}
             </div>

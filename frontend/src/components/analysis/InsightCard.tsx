@@ -64,7 +64,7 @@ function InsightCardInner({ pattern, onClick }: InsightCardProps) {
       )}
 
       <div className={styles.sources}>
-        {pattern.sources.map((s) => (
+        {(pattern.sources ?? []).map((s) => (
           <span key={s.database} className={styles.sourcePill}>
             {s.database}
           </span>

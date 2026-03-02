@@ -44,11 +44,11 @@ export function SharedInvestigation() {
         </p>
       </div>
 
-      {investigation.entity_ids.length > 0 && (
+      {(investigation.entity_ids ?? []).length > 0 && (
         <div className={styles.section}>
           <h2 className={styles.sectionTitle}>{t("investigation.entities")}</h2>
           <div className={styles.entityList}>
-            {investigation.entity_ids.map((eid) => (
+            {(investigation.entity_ids ?? []).map((eid) => (
               <span key={eid} className={styles.entityChip}>{eid}</span>
             ))}
           </div>

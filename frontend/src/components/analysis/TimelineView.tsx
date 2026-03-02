@@ -90,9 +90,9 @@ function TimelineViewInner({
                     {t(`entity.${event.entity_type}`, event.entity_type)}
                   </span>
                   <p className={styles.label}>{event.label}</p>
-                  {event.sources.length > 0 && (
+                  {(event.sources ?? []).length > 0 && (
                     <div className={styles.sources}>
-                      {event.sources.map((s) => (
+                      {(event.sources ?? []).map((s) => (
                         <span key={s.database} className={styles.sourcePill}>
                           {s.database}
                         </span>

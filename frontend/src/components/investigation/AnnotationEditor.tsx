@@ -32,7 +32,7 @@ export function AnnotationEditor() {
 
   // Default entity selection to first entity
   useEffect(() => {
-    if (investigation?.entity_ids.length && !entityId) {
+    if (investigation?.entity_ids?.length && !entityId) {
       setEntityId(investigation.entity_ids[0] ?? "");
     }
   }, [investigation, entityId]);
@@ -63,7 +63,7 @@ export function AnnotationEditor() {
           value={entityId}
           onChange={(e) => setEntityId(e.target.value)}
         >
-          {investigation.entity_ids.map((eid) => (
+          {(investigation.entity_ids ?? []).map((eid) => (
             <option key={eid} value={eid}>{eid}</option>
           ))}
         </select>

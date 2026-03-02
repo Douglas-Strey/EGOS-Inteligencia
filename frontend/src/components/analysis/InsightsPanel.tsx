@@ -201,9 +201,9 @@ function DetailContent({ node }: { node: GraphNode | null }) {
           </div>
         ))}
       </dl>
-      {node.sources.length > 0 && (
+      {(node.sources ?? []).length > 0 && (
         <div className={styles.detailSources}>
-          {node.sources.map((s) => (
+          {(node.sources ?? []).map((s) => (
             <span key={s.database} className={styles.sourcePill}>
               {s.database}
             </span>
