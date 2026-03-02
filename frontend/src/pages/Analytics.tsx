@@ -29,13 +29,27 @@ export function Analytics() {
   if (!data) return <div className={styles.container}><p>Erro ao carregar analytics</p></div>;
 
   const maxDaily = Math.max(...Object.values(data.last_7_days), 1);
-  const sortedPages = Object.entries(data.today.page_views).sort(([, a], [, b]) => b - a);
+
+  // Aggregate entity analysis pages into a single group
+  const aggregatedPages: Record<string, number> = {};
+  for (const [page, views] of Object.entries(data.today.page_views)) {
+    if (page.startsWith("/app/analysis/")) {
+      aggregatedPages["/app/analysis/* (entidades)"] = (aggregatedPages["/app/analysis/* (entidades)"] || 0) + views;
+    } else if (page.startsWith("/app/graph/")) {
+      aggregatedPages["/app/graph/* (grafos)"] = (aggregatedPages["/app/graph/* (grafos)"] || 0) + views;
+    } else {
+      aggregatedPages[page] = (aggregatedPages[page] || 0) + views;
+    }
+  }
+  const sortedPages = Object.entries(aggregatedPages).sort(([, a], [, b]) => b - a).slice(0, 20);
   const sortedHours = Object.entries(data.today.hourly).sort(([a], [b]) => a.localeCompare(b));
 
   return (
     <div className={styles.container}>
       <h1 className={styles.title}>Analytics</h1>
-      <p className={styles.subtitle}>Observabilidade do sistema em tempo real</p>
+      <p className={styles.subtitle}>
+        Dados reais coletados desde o último restart da API (in-memory Redis). Dias anteriores sem dados indicam restart do container.
+      </p>
 
       <div className={styles.grid}>
         <div className={styles.card}>
