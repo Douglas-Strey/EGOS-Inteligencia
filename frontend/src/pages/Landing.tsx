@@ -9,6 +9,7 @@ import {
   InvestigationIcon,
   PatternIcon,
 } from "@/components/landing/FeatureIcons";
+import { ReportsShowcase } from "@/components/landing/ReportsShowcase";
 import { ETLProgress } from "@/components/landing/ETLProgress";
 import { SourceRegistry } from "@/components/landing/SourceRegistry";
 import { UpdatesTimeline } from "@/components/landing/UpdatesTimeline";
@@ -367,12 +368,13 @@ export function Landing() {
         </div>
       </section>
 
+      <ReportsShowcase />
+
       <ETLProgress />
 
       <SourceRegistry />
 
       <UpdatesTimeline />
-
       <LiveDatabaseStatus stats={stats} />
 
       <PartnershipCTA />
