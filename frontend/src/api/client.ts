@@ -377,10 +377,21 @@ export interface ChatEntityCard {
   sources: string[];
 }
 
+export interface EvidenceItem {
+  tool: string;
+  source: string;
+  query: string;
+  result_count: number;
+  timestamp: string;
+  api_url: string;
+}
+
 export interface ChatResponse {
   reply: string;
   entities: ChatEntityCard[];
   suggestions: string[];
+  evidence_chain: EvidenceItem[];
+  cost_usd: number;
 }
 
 export function sendChatMessage(message: string): Promise<ChatResponse> {

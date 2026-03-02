@@ -97,10 +97,20 @@ class EntityCard(BaseModel):
     sources: list[str] = []
 
 
+class EvidenceItem(BaseModel):
+    tool: str
+    source: str
+    query: str
+    result_count: int = 0
+    timestamp: str = ""
+    api_url: str = ""
+
 class ChatResponse(BaseModel):
     reply: str
     entities: list[EntityCard] = []
     suggestions: list[str] = []
+    evidence_chain: list[EvidenceItem] = []
+    cost_usd: float = 0.0
 
 
 # --- Neo4j tool functions ---
@@ -577,14 +587,17 @@ Pesquisa cidadã com dados públicos. Padrões são sinais para aprofundar, não
 async def _call_openrouter(
     messages: list[dict[str, Any]],
     session: AsyncSession,
-) -> tuple[str, list[EntityCard]]:
-    """Call OpenRouter with tool-calling loop. Returns (reply_text, entities)."""
+) -> tuple[str, list[EntityCard], list[dict[str, Any]], float]:
+    """Call OpenRouter with tool-calling loop. Returns (reply_text, entities, evidence, cost)."""
 
     all_entities: list[EntityCard] = []
+    evidence_chain: list[dict[str, Any]] = []
+    total_cost: float = 0.0
 
     if not settings.openrouter_api_key:
         # Fallback to direct search if no API key
-        return await _fallback_search(messages[-1].get("content", ""), session)
+        text, ents = await _fallback_search(messages[-1].get("content", ""), session)
+        return text, ents, [], 0.0
 
     headers = {
         "Authorization": f"Bearer {settings.openrouter_api_key}",
@@ -615,15 +628,22 @@ async def _call_openrouter(
                 data = resp.json()
             except Exception as e:
                 logger.error("OpenRouter call failed: %s", e)
-                return await _fallback_search(messages[-1].get("content", ""), session)
+                text, ents = await _fallback_search(messages[-1].get("content", ""), session)
+                return text, ents, [], 0.0
 
             choice = data.get("choices", [{}])[0]
             message = choice.get("message", {})
 
+            # Track token cost (~$0.075/1M input, $0.30/1M output for Gemini Flash)
+            usage = data.get("usage", {})
+            prompt_tokens = usage.get("prompt_tokens", 0)
+            completion_tokens = usage.get("completion_tokens", 0)
+            total_cost += (prompt_tokens * 0.000000075) + (completion_tokens * 0.0000003)
+
             tool_calls = message.get("tool_calls")
             if not tool_calls:
                 # Final text response
-                return message.get("content", "Desculpe, não consegui processar sua pergunta."), all_entities
+                return message.get("content", "Desculpe, não consegui processar sua pergunta."), all_entities, evidence_chain, total_cost
 
             # Process tool calls
             messages.append(message)
@@ -737,6 +757,51 @@ async def _call_openrouter(
                 else:
                     result = {"error": f"Tool {fn_name} not found"}
 
+                # Track evidence chain
+                source_info = {
+                    "search_entities": ("Neo4j Graph", "neo4j://localhost:7687"),
+                    "get_graph_stats": ("Neo4j Graph", "neo4j://localhost:7687"),
+                    "get_entity_connections": ("Neo4j Graph", "neo4j://localhost:7687"),
+                    "web_search": ("Brave Search / DuckDuckGo", "https://api.search.brave.com/"),
+                    "search_emendas": ("Portal da Transparência — Emendas", "api.portaldatransparencia.gov.br"),
+                    "search_transferencias": ("Portal da Transparência — Transferências", "api.portaldatransparencia.gov.br"),
+                    "search_ceap": ("Câmara dos Deputados — CEAP", "dadosabertos.camara.leg.br"),
+                    "search_pep_city": ("Câmara dos Deputados — PEP", "dadosabertos.camara.leg.br"),
+                    "search_gazettes": ("Querido Diário (OKBR)", "queridodiario.ok.org.br"),
+                    "cnpj_info": ("BrasilAPI — Receita Federal", "brasilapi.com.br"),
+                    "search_votacoes": ("Câmara dos Deputados — Votações", "dadosabertos.camara.leg.br"),
+                    "search_servidores": ("Portal da Transparência — Servidores", "api.portaldatransparencia.gov.br"),
+                    "search_licitacoes": ("Portal da Transparência — Licitações", "api.portaldatransparencia.gov.br"),
+                    "search_cpgf": ("Portal da Transparência — CPGF", "api.portaldatransparencia.gov.br"),
+                    "search_viagens": ("Portal da Transparência — Viagens", "api.portaldatransparencia.gov.br"),
+                    "search_contratos": ("Portal da Transparência — Contratos", "api.portaldatransparencia.gov.br"),
+                    "search_sancoes": ("Portal da Transparência — CEIS/CNEP", "api.portaldatransparencia.gov.br"),
+                    "search_processos": ("DataJud — CNJ", "api-publica.datajud.cnj.jus.br"),
+                }.get(fn_name, ("Desconhecido", ""))
+                
+                result_count = 0
+                if isinstance(result, list):
+                    result_count = len(result)
+                elif isinstance(result, dict):
+                    for k in ("total", "count", "emendas", "transferencias", "deputados", "sancoes", "processos", "resultados", "results"):
+                        v = result.get(k)
+                        if isinstance(v, int):
+                            result_count = v
+                            break
+                        elif isinstance(v, list):
+                            result_count = len(v)
+                            break
+                
+                from datetime import datetime
+                evidence_chain.append({
+                    "tool": fn_name,
+                    "source": source_info[0],
+                    "query": json.dumps(fn_args, ensure_ascii=False)[:200],
+                    "result_count": result_count,
+                    "timestamp": datetime.utcnow().isoformat() + "Z",
+                    "api_url": source_info[1],
+                })
+
                 messages.append({
                     "role": "tool",
                     "tool_call_id": tc["id"],
@@ -745,7 +810,7 @@ async def _call_openrouter(
 
             payload["messages"] = messages
 
-    return "Desculpe, atingi o limite de processamento. Tente uma pergunta mais específica.", all_entities
+    return "Desculpe, atingi o limite de processamento. Tente uma pergunta mais específica.", all_entities, evidence_chain, total_cost
 
 
 async def _fallback_search(user_msg: str, session: AsyncSession) -> tuple[str, list[EntityCard]]:
@@ -865,10 +930,11 @@ async def chat(
     messages.append({"role": "user", "content": body.message})
 
     try:
-        reply, entities = await _call_openrouter(messages, session)
+        reply, entities, evidence, cost = await _call_openrouter(messages, session)
     except Exception as e:
         logger.error("Chat failed: %s", e)
         reply, entities = await _fallback_search(body.message, session)
+        evidence, cost = [], 0.0
 
     # Save to conversation memory
     history.append({"role": "user", "content": body.message})
@@ -881,4 +947,6 @@ async def chat(
         reply=reply,
         entities=entities,
         suggestions=suggestions,
+        evidence_chain=[EvidenceItem(**e) for e in evidence],
+        cost_usd=round(cost, 6),
     )

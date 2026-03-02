@@ -9,6 +9,8 @@ interface ChatMessage {
   text: string;
   entities?: ChatEntityCard[];
   suggestions?: string[];
+  evidence_chain?: { tool: string; source: string; result_count: number }[];
+  cost_usd?: number;
   loading?: boolean;
 }
 
@@ -102,6 +104,8 @@ export function ChatInterface({ embedded = false }: { embedded?: boolean }) {
           text: response.reply,
           entities: response.entities,
           suggestions: response.suggestions,
+          evidence_chain: response.evidence_chain,
+          cost_usd: response.cost_usd,
         }),
       );
     } catch {
