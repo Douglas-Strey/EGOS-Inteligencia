@@ -78,6 +78,12 @@ services:
       - "3000:3000"
     networks:
       - bracc
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
     depends_on:
       - api
 
@@ -96,8 +102,10 @@ services:
     networks:
       - bracc
     depends_on:
-      - api
-      - frontend
+      api:
+        condition: service_started
+      frontend:
+        condition: service_healthy
 
 networks:
   bracc:
