@@ -13,15 +13,15 @@
 
 | Métrica | Valor |
 |---|---|
-| **Nós no grafo** | 278.501 (crescendo — de 40k em fev/2026) |
-| **Relacionamentos** | 30.916 |
-| **Empresas** | 9.645+ (CNPJ 53.6M em carregamento) |
+| **Nós no grafo** | 317.583 (crescendo — CNPJ ETL em andamento, meta: 90M+) |
+| **Relacionamentos** | 34.507 |
+| **Empresas** | 11.597 (CNPJ 53.6M em carregamento via ETL) |
 | **Sanções carregadas** | 23.847 (CEIS + CNEP) |
 | **OpenSanctions** | 4.136.365 entidades |
 | **PEP** | 133.859 Pessoas Expostas Politicamente |
 | **TSE** | Candidaturas + Doações + Bens (2022+2024, 1.7GB) |
 | **ICIJ Offshore Leaks** | 73MB baixado (Panama/Pandora Papers) |
-| **CNPJ Receita Federal** | 🔄 6.8GB upload para Contabo, ETL pronto |
+| **CNPJ Receita Federal** | 🔄 26GB extraído no Contabo, ETL Phase 1 em andamento |
 | **DataJud CNJ** | Script pronto para 80M+ processos judiciais |
 | **Pipelines ETL prontos** | 46 |
 | **Bot Discord** | 14 ferramentas OSINT + fallback de modelos |
@@ -29,8 +29,9 @@
 | **Bot IA** | Gemini 2.0 Flash (free) → fallback pago, memória persistente |
 | **Servidor** | Contabo Cloud VPS 40 SSD — 12 vCPU, 48GB RAM, 500GB SSD ($35/mo) |
 | **Custo total** | $36/mês (100% autofinanciado, sem grants) |
-| **Frontend** | bracc.egos.ia.br — público, sem login |
-| **Investigações** | 11 relatórios publicados (incluindo Patense R$217M BNDES) |
+| **Frontend** | bracc.egos.ia.br — público, sem login, stats em tempo real |
+| **Investigações** | Patense v2 publicado (R$217M BNDES, 4 empresas, 563 ops) |
+| **Performance** | Scripts prontos: Neo4j 16G heap + 22G pagecache + 12 indexes |
 | **Framework** | Construído com EGOS (egos.ia.br) — 24 agentes, MCP tools |
 
 ---
