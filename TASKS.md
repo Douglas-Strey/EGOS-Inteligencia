@@ -520,6 +520,39 @@
 - [x] Testado: sanções agora filtradas corretamente por empresa
 > **Arquivo:** `api/src/bracc/services/transparency_tools.py`
 
+### TASK-066: Evidence Chain — Data Provenance per Query ✅ (02/03/2026)
+- [x] Backend: EvidenceItem model (tool, source, query, result_count, timestamp, api_url)
+- [x] 18 tools mapeados para nomes de fonte e URLs de API
+- [x] Cada resposta do chatbot inclui `evidence_chain[]` com proveniência completa
+- [x] Frontend: display colapsável "Fontes (N) | Custo: $X.XXXX" abaixo de cada resposta
+- [x] Testado: SUPERAR LTDA → 2 evidence items (Neo4j + Brave Search)
+> **Conceito Mycelium aplicado:** Cada dado tem trail auditável — de onde veio, quando, quantos resultados.
+> **Arquivos:** `api/src/bracc/routers/chat.py`, `frontend/src/components/chat/ChatInterface.tsx`, `frontend/src/api/client.ts`
+
+### TASK-067: Cost Tracking per Query ✅ (02/03/2026)
+- [x] Gemini Flash pricing: $0.075/1M input, $0.30/1M output tokens
+- [x] `cost_usd` calculado por query baseado em `usage.prompt_tokens` + `usage.completion_tokens`
+- [x] Retornado na ChatResponse e exibido no frontend
+- [x] Testado: query típica = $0.000552 (~R$ 0,003)
+> **Insight:** Uma investigação completa com 6 tool calls custa ~$0.003 (~R$ 0,02). Para R$630/mês operamos ~210K queries.
+
+### TASK-068: Correção de Custos nos Relatórios ✅ (02/03/2026)
+- [x] Contabo VPS: $35/mês (não €15)
+- [x] Supabase Pro: $20/mês
+- [x] Windsurf IDE: $45/mês
+- [x] OpenRouter LLM: ~$5/mês
+- [x] Brave Search: $0-5/mês
+- [x] TOTAL: ~$105/mês (~R$ 630) — antes constava R$ 120 (ERRADO)
+- [x] Corrigido nos 3 relatórios publicados
+
+### TASK-069: Análise Mycelium + Chat Vision + Prioridades ✅ (02/03/2026)
+- [x] Chat Vision: NÃO AGORA — sistema usa APIs estruturadas, não imagens
+- [x] Mycelium Event Bus: APLICÁVEL — evidence chain implementada como conceito
+- [x] Mycelium ZKP/Shadow Nodes: NÃO AGORA — overengineering sem base de usuários
+- [x] Cross-app events (Intelink ↔ Intel): PLANEJADO para próxima fase
+- [x] Prioridades filtradas: só tasks com ROI real (Evidence Chain, Activity Feed, Eagle Eye)
+> **Documento:** Análise entregue no chat + knowledge base
+
 ### TASK-043: Gem Hunter v2 — Melhorar Busca de Projetos ⏳ (P2)
 - [x] Adicionar keywords semanticas: "accountability", "civic tech", "open government"
 - [x] Busca automatizada via GitHub Search API (5 categorias, 02/03/2026)
@@ -541,7 +574,7 @@
 | **Nós no grafo** | 317.583 | 02/03/2026 |
 | **Relacionamentos** | 34.507 | 02/03/2026 |
 | **Issues GitHub abertas** | 27 | 02/03/2026 |
-| **Tasks concluídas** | 46/65 | 02/03/2026 |
+| **Tasks concluídas** | 50/69 | 02/03/2026 |
 | **Chatbot Tools** | 18 (3 grafo + 8 livres + 6 Portal + 1 DataJud) | 02/03/2026 |
 | **ETL Status** | Phase 1 file 6/10 (15%) — Contabo CPU | 02/03/2026 |
 | **Website** | inteligencia.egos.ia.br (SSL ✅) | 02/03/2026 |
@@ -552,6 +585,9 @@
 | **Segurança** | GitGuardian fix — chaves em env vars | 02/03/2026 |
 | **Relatórios** | 3 publicados (SUPERAR, Manaus, RJ-SP) | 02/03/2026 |
 | **Intelink Audit** | 44 págs, 135 routes, 15 gaps relevantes | 02/03/2026 |
+| **Evidence Chain** | Proveniência de dados em cada query ✅ | 02/03/2026 |
+| **Cost/Query** | ~$0.0006/query (~R$ 0,003) | 02/03/2026 |
+| **Custo Mensal Real** | ~$105/mês (~R$ 630) | 02/03/2026 |
 
 ---
 
