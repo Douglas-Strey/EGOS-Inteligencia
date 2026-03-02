@@ -1,0 +1,28 @@
+# CODEOWNERS — EGOS Inteligência
+# All PRs require review from at least one code owner.
+# External/AI PRs require 2 approvals (enforced via branch protection).
+
+# Default: project maintainer
+* @enioxt
+
+# Critical infrastructure — requires explicit maintainer approval
+.github/          @enioxt
+infra/             @enioxt
+scripts/           @enioxt
+Caddyfile          @enioxt
+docker-compose*    @enioxt
+Dockerfile*        @enioxt
+
+# Security-sensitive — maintainer only
+api/src/bracc/middleware/   @enioxt
+api/src/bracc/config.py     @enioxt
+api/src/bracc/dependencies.py @enioxt
+api/src/bracc/services/auth_service.py @enioxt
+api/src/bracc/services/public_guard.py @enioxt
+
+# ETL pipelines — maintainer only (data integrity)
+etl/               @enioxt
+
+# Documentation — more permissive but still needs review
+docs/              @enioxt
+*.md               @enioxt
