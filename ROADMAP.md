@@ -13,16 +13,22 @@
 
 | Métrica | Valor |
 |---|---|
-| **Nós no grafo** | 40.584+ (crescendo) |
+| **Nós no grafo** | 210.596+ (crescendo — de 40k em fev/2026) |
 | **Relacionamentos** | 23.870+ |
 | **Empresas** | 9.645+ |
 | **Sanções carregadas** | 23.847 (CEIS + CNEP) |
-| **OpenSanctions** | 4.136.365 entidades (carregando) |
-| **ICIJ Offshore Leaks** | Baixado (Panama/Pandora Papers) |
+| **OpenSanctions** | 4.136.365 entidades (ETL rodando) |
+| **PEP** | 133.859 Pessoas Expostas Politicamente |
+| **TSE** | Candidaturas + Doações + Bens (2022+2024, 1.7GB) |
+| **ICIJ Offshore Leaks** | 73MB baixado (Panama/Pandora Papers) |
+| **DataJud CNJ** | Script pronto para 80M+ processos judiciais |
 | **Pipelines ETL prontos** | 46 |
-| **Scripts de download** | 39 |
-| **Servidor** | VPS Contabo 48GB RAM, Neo4j dedicado |
-| **Bot Discord** | 11 ferramentas OSINT ao vivo |
+| **Scripts de download** | 39 + download-datajud.sh |
+| **Servidor** | VPS Contabo 48GB RAM, Neo4j + bots 24/7 |
+| **Bot Discord** | 13 ferramentas OSINT, modo agente autônomo |
+| **Bot Telegram** | 13 ferramentas OSINT (@EGOSin_bot) |
+| **Frontend** | bracc.egos.ia.br — público, sem login |
+| **Download guide** | docs/pt-BR/DOWNLOAD_DADOS.md (33 datasets) |
 
 ---
 
@@ -408,13 +414,43 @@ O projeto [Intelink](https://intelink.ia.br) (EGOS) já implementou capacidades 
 
 ---
 
+## Fase 6: MCP — Ferramentas para Qualquer IDE (PRÓXIMA)
+
+> **Estratégia:** Os bots Discord/Telegram são ótimos para consultas rápidas, mas limitados para
+> análises profundas com memória persistente. A solução: empacotar nossas ferramentas OSINT como
+> **MCP Servers** (Model Context Protocol) para que qualquer pessoa com uma IDE (VS Code, Cursor,
+> Windsurf, etc.) tenha acesso completo a todas as capacidades — com memória infinita da IDE.
+
+| # | Task | Status | Complexidade | Issue |
+|---|---|---|---|---|
+| 1 | **egos-mcp**: MCP Server com 13 ferramentas OSINT | ⬜ Precisa fazer | Alta | `help-wanted` |
+| 2 | **Busca CNPJ**: Tool para buscar CNPJ a partir de nome de empresa | ⬜ Precisa fazer | Média | `good-first-issue` |
+| 3 | **MCP no egos.ia.br**: Suporte a MCP no website | ⬜ Precisa fazer | Alta | `help-wanted` |
+| 4 | **Documentação MCP**: Guia de instalação e uso | ⬜ Precisa fazer | Baixa | `good-first-issue` |
+| 5 | **Auto-learning**: Tasks criadas automaticamente pelo bot a partir de feedback | ✅ Implementado | — | — |
+| 6 | **Bot autônomo**: Modo agente — executa sem pedir permissão | ✅ Implementado | — | — |
+| 7 | **Memória estendida**: 40 msgs, 16k chars, 30min janela | ✅ Implementado | — | — |
+
+### Por que MCP?
+
+- **Memória persistente**: IDEs mantêm contexto muito maior que Discord/Telegram
+- **Ecossistema existente**: 100k+ devs já usam MCP no VS Code, Cursor, Windsurf
+- **Zero infraestrutura**: Usuário instala, configura e usa — sem servidor adicional
+- **Composabilidade**: Usuário pode combinar EGOS MCP com outros MCPs (filesystem, database, etc.)
+- **Open source**: Qualquer um pode criar novos tools e contribuir
+
+---
+
 ## Links
 
 - **Código:** [github.com/World-Open-Graph/br-acc](https://github.com/World-Open-Graph/br-acc) (upstream)
 - **Fork EGOS:** [github.com/enioxt/br-acc](https://github.com/enioxt/br-acc) (nosso fork ativo)
 - **API ao vivo:** http://217.216.95.126/api/v1/public/
-- **Bot Discord:** EGOS Intelligence#2881 (DMs abertas)
+- **Frontend:** [bracc.egos.ia.br](https://bracc.egos.ia.br) (público, sem login)
+- **Bot Discord:** EGOS Intelligence#2881 (DMs abertas, 13 tools)
+- **Bot Telegram:** [@EGOSin_bot](https://t.me/EGOSin_bot) (13 tools)
 - **Ecossistema EGOS:** [egos.ia.br](https://egos.ia.br)
+- **Comunidade Telegram:** [@ethikin](https://t.me/ethikin)
 
 ---
 
