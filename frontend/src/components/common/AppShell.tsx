@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Link, Outlet, useLocation, useNavigate } from "react-router";
 
 import {
+  Activity,
   BarChart3,
   ChevronLeft,
   ChevronRight,
@@ -29,6 +30,7 @@ const NAV_ITEMS = [
   { path: "/app", icon: BarChart3, labelKey: "nav.dashboard" },
   { path: "/app/search", icon: Search, labelKey: "nav.search" },
   { path: "/app/investigations", icon: FolderOpen, labelKey: "nav.investigations" },
+  { path: "/app/analytics", icon: Activity, labelKey: "nav.analytics" },
 ] as const;
 
 export function AppShell() {
