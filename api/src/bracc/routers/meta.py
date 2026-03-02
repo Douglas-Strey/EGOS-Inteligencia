@@ -154,7 +154,7 @@ async def etl_progress() -> dict[str, Any]:
             stat = os.stat(log_path)
             import time as _time
             age_seconds = _time.time() - stat.st_mtime
-            result["running"] = age_seconds < 600  # updated in last 10 min
+            result["running"] = age_seconds < 10800  # updated in last 3h (each CSV file takes ~2h)
         except Exception:
             result["running"] = False
 
