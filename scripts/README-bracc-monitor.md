@@ -75,5 +75,5 @@ Não é necessária alteração no script; basta o bot usar o `workflow_dispatch
 
 ## Limitações
 
-- **Primeira execução:** Sem estado anterior, todos os forks e PRs são considerados “já conhecidos”; não há notificação de “novo” na primeira vez.
+- **Primeira execução:** Sem estado anterior, o relatório JSON ainda preenche o campo `new_since` por item (forks e PRs podem aparecer com `new_since: true`), mas as notificações (Discord/Telegram) são suprimidas nessa execução inicial para evitar spam; a partir da segunda execução, itens realmente novos disparam notificações.
 - **TASKS.md:** Apenas gera sugestões de vínculo no relatório; não atualiza o `TASKS.md` automaticamente.
