@@ -262,8 +262,12 @@ async function fetchIssues(octokit: Octokit): Promise<{ upstream: IssueEntry[]; 
       per_page: pageSize,
       page,
     });
+    if (list.length === 0) break;
     const issues = list.filter((i) => !i.pull_request);
-    if (issues.length === 0) break;
+    if (issues.length === 0) {
+      page++;
+      continue;
+    }
     for (const i of issues) {
       upstream.push({
         number: i.number,
@@ -287,8 +291,12 @@ async function fetchIssues(octokit: Octokit): Promise<{ upstream: IssueEntry[]; 
         per_page: pageSize,
         page,
       });
+      if (list.length === 0) break;
       const issues = list.filter((i) => !i.pull_request);
-      if (issues.length === 0) break;
+      if (issues.length === 0) {
+        page++;
+        continue;
+      }
       for (const i of issues) {
         ours.push({
           number: i.number,
