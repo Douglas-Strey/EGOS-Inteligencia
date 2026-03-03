@@ -313,8 +313,8 @@ Live-tested scan returned **102 alerts** across 10 cities in 7 days. Pattern typ
 | **Nodes** | 9.1M | Billions | N/A (user-built) | 270M+ | 2.1M entities |
 | **Sources** | 36 loaded / 108 registered | 1000+ | 100+ transforms | 600+ datasets | 297 sources |
 | **Graph Traversal** | Basic (1-hop, no GDS) | Advanced (multi-hop, ML) | Advanced (transforms) | Advanced (cross-ref) | Advanced (matching) |
-| **Pattern Detection** | ❌ Disabled | ✅ ML-powered | ✅ Manual + transforms | ✅ Rule-based | ✅ Dedup + matching |
-| **Entity Resolution** | ❌ None | ✅ Probabilistic | ✅ Manual | ✅ followthemoney | ✅ OpenSanctions |
+| **Pattern Detection** | ✅ 10 rule-based detectors | ✅ ML-powered | ✅ Manual + transforms | ✅ Rule-based | ✅ Dedup + matching |
+| **Entity Resolution** | ⏳ Built, pending ETL Phase 3 | ✅ Probabilistic | ✅ Manual | ✅ followthemoney | ✅ OpenSanctions |
 | **Real-time Alerts** | ❌ On-demand only | ✅ Continuous | ❌ | ✅ | ✅ |
 | **Multi-user** | ❌ Single-tenant | ✅ Enterprise | ✅ Teams | ✅ | ✅ API |
 | **Price** | **$25/month** | **$10M+/year** | **$5K+/year** | **Free (restricted)** | **Free (API)** |
