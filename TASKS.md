@@ -18,12 +18,14 @@
 
 ### TASK-002: Neo4j Performance Optimization ⏳
 - [x] Criar script `neo4j-memory-upgrade.sh` (16G heap, 22G pagecache)
-- [x] Criar script `post-etl-optimize.sh` (12 indexes + fulltext)
+- [x] Criar script `post-etl-optimize.sh` (13 indexes: 9 B-tree + 2 fulltext + 2 composite)
 - [x] Documentar arquitetura: `docs/analysis/PERFORMANCE_ARCHITECTURE_2026-03.md`
+- [x] Scripts deployed to VPS (`/opt/bracc/scripts/`) — session 17
 - [ ] Aplicar memory upgrade APÓS ETL completar
-- [ ] Criar todos os indexes APÓS ETL completar
+- [ ] Executar `post-etl-optimize.sh` APÓS ETL completar
 - [ ] Verificar query < 5ms para CNPJ lookup
 > **Depende de:** TASK-001
+> **Arquivos:** `infra/scripts/neo4j-memory-upgrade.sh`, `infra/scripts/post-etl-optimize.sh`
 
 ### TASK-003: Search Fix + Hardcoded Data ✅ (02/03/2026)
 - [x] Remover números falsos do i18n.ts (87M, 53M, 8 algoritmos)
@@ -134,21 +136,29 @@
 - [ ] ETL para dados de salários do judiciário
 - [ ] Detecção de supersalários acima do teto
 
-### TASK-017: Lei de Benford (GitHub #6) ⬜
-- [ ] Implementar análise de primeiro dígito em contratos
-- [ ] API endpoint para consulta por órgão
+### TASK-017: Lei de Benford (GitHub #6) ✅ (03/03/2026)
+- [x] Pattern detector `benford_contract_values` implementado em Cypher
+- [x] API endpoint: `GET /api/v1/patterns/{entity_id}/benford_contract_values`
+- [x] MAD threshold configurável via `PATTERN_BENFORD_MAD_THRESHOLD`
+- [x] Mínimo de contratos configurável via `PATTERN_BENFORD_MIN_CONTRACTS`
+> **Arquivos:** `queries/public_pattern_benford_contract_values.cypher`, `config.py`
 
-### TASK-018: HHI — Concentração de Fornecedores (GitHub #7) ⬜
-- [ ] Implementar índice Herfindahl-Hirschman
-- [ ] Detectar monopolização por órgão contratante
+### TASK-018: HHI — Concentração de Fornecedores (GitHub #7) ✅ (03/03/2026)
+- [x] Pattern detector `hhi_contract_concentration` implementado em Cypher
+- [x] API endpoint: `GET /api/v1/patterns/{entity_id}/hhi_contract_concentration`
+- [x] Threshold configurável via `PATTERN_HHI_THRESHOLD` (default 0.25)
+> **Arquivos:** `queries/public_pattern_hhi_contract_concentration.cypher`, `config.py`
 
-### TASK-019: i18n Completo PT-BR (GitHub #1, #2) ⬜
+### TASK-019: i18n Completo PT-BR (GitHub #1, #2) ⏳
 - [ ] Frontend: locale pt-BR completo
-- [ ] API: mensagens de erro em PT-BR
+- [x] API: mensagens de erro em PT-BR (verificado session 17 — testes atualizados)
 
-### TASK-020: Neutrality Audit CI ⬜
-- [ ] CI que bane palavras como "suspicious", "corrupt", "criminal"
-- [ ] Adaptado do br-acc upstream
+### TASK-020: Neutrality Audit CI ✅ (03/03/2026)
+- [x] CI job `neutrality` em `.github/workflows/ci.yml` — 9 banned words
+- [x] `test_no_banned_words_in_pattern_metadata` em unit tests
+- [x] Exemption via `# neutrality-ok` comment
+- [x] Fixed 1 violation: `journey.ts` "corrupt" → "malformed"
+> **Arquivos:** `.github/workflows/ci.yml`, `api/tests/unit/test_patterns.py`
 
 ### TASK-021: Interoperabilidade Global (GitHub #18) ⬜
 - [ ] FollowTheMoney format
