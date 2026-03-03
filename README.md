@@ -35,7 +35,7 @@ O EGOS Inteligência diverge significativamente do upstream:
 | **Algoritmos** | Básico | PageRank, Benford, HHI, Community Detection (roadmap) |
 | **Ecossistema** | Standalone | Integrado ao [EGOS Framework](https://egos.ia.br) (24 agentes AI) |
 
-Mantemos rastreamento do upstream e contribuímos PRs quando aplicável.
+Mantemos rastreamento do upstream e contribuímos PRs quando aplicável. Um job automatizado ([BR-ACC Monitor](scripts/README-bracc-monitor.md)) roda 2x ao dia (GitHub Actions) para listar forks, PRs e issues do upstream, categorizar mudanças e sugerir alinhamento do TASKS.md com PRs mergeados; notificações opcionais no Discord/Telegram.
 
 ---
 
@@ -247,7 +247,7 @@ Veja [ROADMAP.md](ROADMAP.md) para o plano completo. Destaques:
 
 EGOS Inteligência is an open-source platform for cross-referencing Brazilian public data, built on a graph database connecting companies, politicians, contracts, sanctions, and electoral donations.
 
-**Forked from** [World-Open-Graph/br-acc](https://github.com/World-Open-Graph/br-acc) with significant divergence: mobile-first UI, AI chatbot, LGPD-compliant CPF blocking, 14 OSINT tools via Discord/Telegram bots, 79 planned data sources, and integration with the [EGOS Framework](https://egos.ia.br) (24 AI agents).
+**Forked from** [World-Open-Graph/br-acc](https://github.com/World-Open-Graph/br-acc) with significant divergence: mobile-first UI, AI chatbot, LGPD-compliant CPF blocking, 14 OSINT tools via Discord/Telegram bots, 79 planned data sources, and integration with the [EGOS Framework](https://egos.ia.br) (24 AI agents). An automated [BR-ACC Monitor](scripts/README-bracc-monitor.md) runs twice daily (GitHub Actions) to track upstream forks, PRs, issues, and roadmap suggestions.
 
 ## Live Infrastructure
 
@@ -279,20 +279,11 @@ export NEO4J_PASSWORD=your_password && bash infra/scripts/seed-dev.sh
 - Investigation upload, fork, and sharing (planned)
 - 79 data sources on roadmap (vs 13 upstream)
 - Integrated with EGOS ecosystem (24 AI agents, MCP tools)
+- Automated upstream monitor (forks, PRs, issues; TASK↔PR suggestions in JSON only, no automatic update to TASKS.md) 2x/day via GitHub Actions
 
 ## LGPD Compliance
 
 CPF (Brazilian personal tax ID) is **never** searchable, displayable, or exportable. Only CNPJ (company ID) and publicly mandated data are exposed. All JSON responses pass through a CPF masking middleware as a safety net.
-
-## Documentação Técnica
-
-| Documento | O que contém |
-|-----------|-------------|
-| **[Dossiê Técnico](docs/TECHNICAL_DOSSIE_2026-03.md)** | Audit completo: arquitetura, 23 features, 10 pontos fortes, 10 fracos, 8 riscos, 16 recomendações |
-| **[Análise Intelink vs EGOS](docs/MERGE_ANALYSIS.md)** | Comparação frame-by-frame, 3 alternativas de merge |
-| [Stack Decision](docs/analysis/STACK_SCALING_DECISION_2026-03.md) | Python vs Go — decisão de manter Python |
-| [Fontes de Dados](docs/data-sources.md) | 108 fontes documentadas |
-| [Compliance Legal](docs/legal/legal-index.md) | LGPD, ETHICS, PRIVACY, TERMS |
 
 ## Contributing
 
