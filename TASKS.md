@@ -941,11 +941,17 @@
 - [x] Test patterns endpoint (list, 503 disabled, 404 invalid, include_probable)
 - [x] Test CPF masking middleware (mask, PEP exception)
 - [x] Test public_guard (CPF blocked, Person hidden, props stripped)
-- [ ] Test search endpoint against live VPS (fulltext, CNPJ, empty query)
-- [ ] Test chat endpoint (tool calling, tier fallback, rate limit)
+- [x] Test search endpoint against live VPS (fulltext, CNPJ, empty query, pagination)
+- [x] Test chat endpoint (simple query, empty rejection)
+- [x] Test entity lookup (CNPJ, invalid format, graph traversal)
+- [x] Test patterns against live VPS (list 10, invalid 404)
+- [x] Test health/meta/activity/cache endpoints
+- [x] 955 ETL unit tests passing (0 warnings after Pandas fix)
 - [ ] Integration tests with testcontainers Neo4j
-> **Status (session 17):** 219 pass, 1 skip, 1 xfail. Local venv at `api/.venv/`
-> **Esforço restante:** 4h | **Impacto:** Qualidade e confiança
+- [ ] Test chat tool calling + tier fallback + rate limit
+> **Status (session 17-18):** 219 API unit + 18 live integration + 955 ETL = **1,192 tests**
+> **Arquivos:** `api/tests/integration/test_live_api.py`, `api/tests/unit/`, `etl/tests/`
+> **Esforço restante:** 2h | **Impacto:** Qualidade e confiança
 
 ### TASK-110: Neo4j Backup Script (Cron) ✅ (03/03/2026)
 - [x] Hot tar backup do volume Docker (sem parar Neo4j) + count snapshot
