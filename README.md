@@ -279,7 +279,7 @@ export NEO4J_PASSWORD=your_password && bash infra/scripts/seed-dev.sh
 - Investigation upload, fork, and sharing (planned)
 - 79 data sources on roadmap (vs 13 upstream)
 - Integrated with EGOS ecosystem (24 AI agents, MCP tools)
-- Automated upstream monitor (forks, PRs, issues, TASKS sync) 2x/day via GitHub Actions
+- Automated upstream monitor (forks, PRs, issues; TASK↔PR suggestions in JSON only, no automatic update to TASKS.md) 2x/day via GitHub Actions
 
 ## LGPD Compliance
 
