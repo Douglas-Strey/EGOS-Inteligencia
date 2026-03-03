@@ -61,7 +61,7 @@ class CacheService:
     @staticmethod
     def _make_key(prefix: str, params: dict[str, Any]) -> str:
         raw = json.dumps(params, sort_keys=True, default=str)
-        h = hashlib.md5(raw.encode()).hexdigest()[:12]
+        h = hashlib.md5(raw.encode(), usedforsecurity=False).hexdigest()[:12]
         return f"egos:{prefix}:{h}"
 
     async def get(self, prefix: str, params: dict[str, Any]) -> Any | None:
