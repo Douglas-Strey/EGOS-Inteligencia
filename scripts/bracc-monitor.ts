@@ -437,34 +437,57 @@ async function fetchRoadmapSuggestions(
 // Notifications
 // ---------------------------------------------------------------------------
 
+const WEBHOOK_TIMEOUT_MS = 10_000;
+
+async function sendWebhookRequest(
+  url: string,
+  options: { method: string; body: string },
+  callerName: string
+): Promise<void> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), WEBHOOK_TIMEOUT_MS);
+  try {
+    const response = await fetch(url, {
+      method: options.method,
+      headers: { "Content-Type": "application/json" },
+      body: options.body,
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
+    if (!response.ok) {
+      console.warn(`[${callerName}] webhook request failed: status=${response.status}`);
+      return;
+    }
+  } catch (e) {
+    clearTimeout(timeoutId);
+    const message = e instanceof Error ? e.message : "unknown error";
+    console.warn(`[${callerName}] webhook request error: ${message}`);
+  }
+}
+
 async function notifyDiscord(text: string): Promise<void> {
   const url = process.env.DISCORD_WEBHOOK_URL;
   if (!url) return;
-  try {
-    await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ content: text }),
-    });
-  } catch (e) {
-    console.warn("Discord notification failed:", e);
-  }
+  await sendWebhookRequest(
+    url,
+    { method: "POST", body: JSON.stringify({ content: text }) },
+    "notifyDiscord"
+  );
 }
 
 async function notifyTelegram(text: string): Promise<void> {
   const token = process.env.TELEGRAM_BOT_TOKEN;
   const chatId = process.env.TELEGRAM_CHAT_ID;
   if (!token || !chatId) return;
-  try {
-    const url = `https://api.telegram.org/bot${token}/sendMessage`;
-    await fetch(url, {
+  const telegramUrl = `https://api.telegram.org/bot${token}/sendMessage`;
+  await sendWebhookRequest(
+    telegramUrl,
+    {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ chat_id: chatId, text, disable_web_page_preview: true }),
-    });
-  } catch (e) {
-    console.warn("Telegram notification failed:", e);
-  }
+    },
+    "notifyTelegram"
+  );
 }
 
 async function sendRelevantNotifications(report: Report): Promise<void> {
