@@ -901,11 +901,11 @@
 > **Risco:** Keys visíveis em `git log -p` para qualquer pessoa com clone do repo
 > **Esforço:** 30min | **Impacto:** Segurança crítica
 
-### TASK-106: Whitelist Cypher Injection em `_tool_cypher` 🔴 (P0)
-- [ ] Substituir blacklist (`CREATE, DELETE, MERGE...`) por whitelist
-- [ ] Permitir APENAS: `MATCH`, `RETURN`, `WITH`, `UNWIND`, `ORDER`, `LIMIT`, `WHERE`, `OPTIONAL`, `AS`, `DISTINCT`, `COUNT`, `SUM`, `AVG`, `COLLECT`
-- [ ] Bloquear: `CALL`, `LOAD CSV`, `FOREACH`, `CREATE`, `DELETE`, `MERGE`, `SET`, `REMOVE`, `DROP`, `DETACH`
-- [ ] Adicionar teste de regressão
+### TASK-106: Whitelist Cypher Injection em `_tool_cypher` ✅ (03/03/2026)
+- [x] Substituir blacklist (`CREATE, DELETE, MERGE...`) por whitelist
+- [x] Permitir APENAS: `MATCH`, `RETURN`, `WITH`, `UNWIND`, `ORDER`, `LIMIT`, `WHERE`, `OPTIONAL`, `AS`, `DISTINCT`, `COUNT`, `SUM`, `AVG`, `COLLECT`
+- [x] Bloquear: `CALL`, `LOAD CSV`, `FOREACH`, `CREATE`, `DELETE`, `MERGE`, `SET`, `REMOVE`, `DROP`, `DETACH`
+- [ ] Adicionar teste de regressão (P2)
 > **Evidência:** `api/src/bracc/routers/chat.py:264-281`
 > **Esforço:** 1h | **Impacto:** Fecha maior vetor de ataque
 
