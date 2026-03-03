@@ -1,33 +1,31 @@
 {$DOMAIN} {
-    # --- API routes ---
-    handle /api/* {
-        reverse_proxy api:8000
-        header {
-            Content-Security-Policy "default-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'"
-        }
-    }
+	# --- Routing ---
+	handle /api/* {
+		reverse_proxy api:8000
+	}
+	handle /health {
+		reverse_proxy api:8000
+	}
+	handle {
+		reverse_proxy frontend:3000
+	}
 
-    handle /health {
-        reverse_proxy api:8000
-    }
+	# --- CSP per route type ---
+	@api path /api/* /health
+	header @api Content-Security-Policy "default-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'"
 
-    # --- Frontend routes ---
-    handle {
-        reverse_proxy frontend:3000
-        header {
-            Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://{$DOMAIN}; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
-        }
-    }
+	@frontend not path /api/* /health
+	header @frontend Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://{$DOMAIN}; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
 
-    # --- Global security headers ---
-    header {
-        X-Content-Type-Options nosniff
-        X-Frame-Options DENY
-        X-XSS-Protection "1; mode=block"
-        Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
-        Referrer-Policy strict-origin-when-cross-origin
-        Permissions-Policy "accelerometer=(), camera=(), geolocation=(), gyroscope=(), microphone=(), payment=(), usb=()"
-        -Server
-        -X-Powered-By
-    }
+	# --- Global security headers ---
+	header {
+		X-Content-Type-Options nosniff
+		X-Frame-Options DENY
+		X-XSS-Protection "1; mode=block"
+		Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+		Referrer-Policy strict-origin-when-cross-origin
+		Permissions-Policy "accelerometer=(), camera=(), geolocation=(), gyroscope=(), microphone=(), payment=(), usb=()"
+		-Server
+		-X-Powered-By
+	}
 }
