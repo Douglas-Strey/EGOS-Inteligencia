@@ -393,7 +393,7 @@ async function fetchRoadmapSuggestions(
     for (const pr of list) {
       if (!pr.merged_at) continue;
       const mergedAt = new Date(pr.merged_at);
-      if (mergedAt < since) break;
+      if (mergedAt < since) continue;
       merged.push({
         number: pr.number,
         title: pr.title ?? "",
