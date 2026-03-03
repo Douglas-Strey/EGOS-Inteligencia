@@ -986,13 +986,13 @@
 > **Depende de:** TASK-105 (rotacionar primeiro)
 > **Esforço:** 1h
 
-### TASK-114: DSAR Workflow Automatizado ⬜ (P2)
-- [ ] GitHub issue template para Data Subject Access Request
+### TASK-114: DSAR Workflow Automatizado ⏳ (P2)
+- [x] GitHub issue template `dsar_request.yml` — 6 request types, identity, evidence, attestation (session 18)
 - [ ] Endpoint `/api/v1/dsar` para submissão programática
 - [ ] Workflow: register → verify scope → produce decision log
 - [ ] Prazo LGPD: 15 dias úteis para resposta
-> **Evidência:** LGPD Art. 18 — hoje é via issue manual
-> **Esforço:** 8h
+> **Arquivos:** `.github/ISSUE_TEMPLATE/dsar_request.yml`
+> **Evidência:** LGPD Art. 18 — template criado, API pendente
 
 ### TASK-115: CORS Explícito + JWT Startup Validation ✅ (03/03/2026)
 - [x] CORS: `allow_headers` explícito (Authorization, Content-Type, Accept, Origin, X-Requested-With)
