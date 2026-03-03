@@ -38,6 +38,7 @@ Este diretório centraliza documentação técnica, operacional, legal e materia
 - [Relatórios](reports/)
 - [Análises](analysis/)
 - [Decisão de stack e escala (Python/Go/Node)](analysis/STACK_SCALING_DECISION_2026-03.md)
+- [Plano Mycelium Audit Trail (não repúdio)](analysis/MYCELIUM_AUDIT_TRAIL_2026-03.md)
 - [Showcase](showcase/)
 - [Planos](plans/)
 
