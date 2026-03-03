@@ -1,6 +1,6 @@
 # TASKS.md — EGOS Inteligência (SSOT)
 
-> **Updated:** 2026-03-03 (session 18) | **Stars:** 74 ⭐ | **Forks:** 8 | **Patterns:** 10 | **Nodes:** 9.1M | **Tests:** 1,205+ | **Tasks:** 86/128 ✅ | **GitHub Issues:** https://github.com/enioxt/EGOS-Inteligencia/issues
+> **Updated:** 2026-03-03 (session 19) | **Stars:** 74 ⭐ | **Forks:** 8 | **Patterns:** 10 | **Nodes:** 9.1M | **Tests:** 1,208+ | **Tasks:** 90/130 ✅ | **GitHub Issues:** https://github.com/enioxt/EGOS-Inteligencia/issues
 
 ---
 
@@ -211,13 +211,15 @@
 - [x] Memória de conversa por sessão (IP-based, 30min TTL, 20 msgs)
 - [x] 3 tools: search_entities, get_graph_stats, get_entity_connections
 - [x] Sugestões contextuais dinâmicas
-- [ ] Phase 3: rich results (entity cards clicáveis, mini-grafos)
+- [x] Phase 3: rich results — entity cards clicáveis + evidence chain + cost display ✅ (03/03/2026)
 > **Arquivos:** `api/src/bracc/routers/chat.py`, `frontend/src/components/chat/ChatInterface.tsx`
 
-### TASK-028: Investigações — Upload, Fork, Compartilhamento ⬜
-- [ ] Formatos de exportação: MD, PDF, DOCX, JSON, HTML
-- [ ] Formatos de importação: MD, JSON, HTML (os que fazem sentido)
-- [ ] Fork/clone de investigações públicas
+### TASK-028: Investigações — Export Formats ✅ (03/03/2026)
+- [x] Formatos de exportação: MD, JSON, HTML, PDF (4 formatos)
+- [x] `export_service.py` — Markdown + HTML renderers com CPF masking
+- [x] `_resolve_entities()` — helper compartilhado com PEP guard
+- [ ] Formatos de importação: MD, JSON, HTML (P2 futuro)
+- [ ] Fork/clone de investigações públicas (P2 futuro)
 - [ ] Espiral de escuta — continuar investigação a partir de outra
 - [ ] Interação e comentários em investigações compartilhadas
 
@@ -1000,11 +1002,12 @@
 - [x] JWT: `raise RuntimeError` em production se secret fraco/default (dev apenas loga)
 > **Arquivos:** `main.py`
 
-### TASK-116: Componentizar Landing.tsx ⬜ (P2)
-- [ ] Extrair HeroSearch component
-- [ ] Extrair FeaturesSection, HowItWorks, SourcesSection, Footer
-- [ ] Cada componente com seu próprio CSS module
-> **Esforço:** 3h
+### TASK-116: Componentizar Landing.tsx ✅ (03/03/2026)
+- [x] Extrair HeroSearch → `components/landing/HeroSearch.tsx`
+- [x] Extrair LiveDatabaseStatus → `components/landing/LiveDatabaseStatus.tsx`
+- [x] Extrair PartnershipCTA → `components/landing/PartnershipCTA.tsx`
+- [x] Landing.tsx: 533 → 287 linhas (-46%)
+> **Arquivos:** `pages/Landing.tsx`, `components/landing/HeroSearch.tsx`, `components/landing/LiveDatabaseStatus.tsx`, `components/landing/PartnershipCTA.tsx`
 
 ### TASK-117: Registro de Tratamento LGPD (Art. 37) ✅ (03/03/2026)
 - [x] 6 categorias documentadas: CNPJ, TSE, Contratos, Sanções, PEP, Interação
