@@ -37,6 +37,7 @@ Este diretório centraliza documentação técnica, operacional, legal e materia
 ### Relatórios e análises
 - [Relatórios](reports/)
 - [Análises](analysis/)
+- [Decisão de stack e escala (Python/Go/Node)](analysis/STACK_SCALING_DECISION_2026-03.md)
 - [Showcase](showcase/)
 - [Planos](plans/)
 

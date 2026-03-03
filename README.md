@@ -15,6 +15,8 @@ Site: [inteligencia.egos.ia.br](https://inteligencia.egos.ia.br) | Ecossistema: 
 
 📚 **Índice de documentação:** [docs/README.md](docs/README.md)
 
+📈 **Análise de escala de stack (Python/Go/Node):** [docs/analysis/STACK_SCALING_DECISION_2026-03.md](docs/analysis/STACK_SCALING_DECISION_2026-03.md)
+
 ---
 
 ## Origem e Diferenças
