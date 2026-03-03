@@ -68,14 +68,16 @@ export function ChatInterface({ embedded = false }: { embedded?: boolean }) {
           setMessages([{
             id: "welcome",
             role: "assistant",
-            text: `Olá! Sou o agente investigativo do **EGOS Inteligência**.\n\n🔍 Tenho acesso a **${nodes} mil entidades** e **${rels} mil conexões** em dados públicos brasileiros — empresas, políticos, contratos, sanções, licitações e muito mais.\n\n📊 **18 ferramentas** de busca integradas em **${sources} fontes**: Portal da Transparência, DataJud, Querido Diário, CEAP, e mais.\n\n📋 **4 relatórios** de investigação já publicados.\n\nDigite um CNPJ, nome de empresa, cidade, ou escolha uma sugestão abaixo:`,
+            text: `Olá! Sou o agente investigativo do **EGOS Inteligência**.\n\n🔍 **${nodes} mil entidades** e **${rels} mil conexões** em dados públicos brasileiros.\n📊 **24 ferramentas** integradas em **${sources} fontes** (Portal da Transparência, DataJud, BNMP, Interpol, PNCP, OAB, e mais).\n\n**Você não precisa de CNPJ ou nome completo!** Escolha uma sugestão abaixo ou digite:\n- 🏙️ Uma **cidade** (ex: "Uberlândia", "Manaus")\n- 👤 Um **nome** (parcial ok: "Silva", "Bolsonaro")\n- 🏢 Uma **empresa** (nome fantasia: "Odebrecht")\n- 📋 Um **tema** ("licitações SP", "trabalho escravo")\n\n⚡ Modelo: GPT-4o-mini · Custo por consulta: ~$0.001`,
             suggestions: [
-              "Investigar empresa por CNPJ",
-              "Ver relatórios de investigação",
-              "Deputados que mais gastaram em 2024",
-              "Emendas parlamentares para minha cidade",
-              "Empresas sancionadas com contratos ativos",
-              "Buscar licitações suspeitas",
+              "Políticos de São Paulo",
+              "Empresas sancionadas que ainda recebem contratos",
+              "Emendas parlamentares Minas Gerais 2024",
+              "Deputados que mais gastaram com cartão corporativo",
+              "Lista suja trabalho escravo",
+              "Licitações suspeitas Rio de Janeiro",
+              "Mandados de prisão pendentes",
+              "Recuperações judiciais recentes TJSP",
             ],
           }]);
         })
@@ -83,14 +85,16 @@ export function ChatInterface({ embedded = false }: { embedded?: boolean }) {
           setMessages([{
             id: "welcome",
             role: "assistant",
-            text: "Olá! Sou o agente investigativo do **EGOS Inteligência**. Digite um CNPJ, nome de empresa, ou cidade para começar.",
+            text: "Olá! Sou o agente investigativo do **EGOS Inteligência**.\n\n**Você não precisa de CNPJ!** Digite uma cidade, nome, empresa ou tema para começar.\n\n⚡ Modelo: GPT-4o-mini",
             suggestions: [
-              "Investigar empresa por CNPJ",
-              "Ver relatórios de investigação",
-              "Deputados que mais gastaram em 2024",
-              "Emendas parlamentares para minha cidade",
-              "Empresas sancionadas com contratos ativos",
-              "Buscar licitações suspeitas",
+              "Políticos de São Paulo",
+              "Empresas sancionadas com contratos",
+              "Emendas parlamentares 2024",
+              "Deputados que mais gastaram",
+              "Lista suja trabalho escravo",
+              "Licitações suspeitas",
+              "Mandados de prisão pendentes",
+              "Recuperações judiciais TJSP",
             ],
           }]);
         });

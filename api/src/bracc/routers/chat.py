@@ -68,12 +68,57 @@ _conversation_ts: dict[str, float] = {}
 _MAX_HISTORY = 20
 _TTL_SECONDS = 1800
 
+# --- Rate limit + model fallback (per IP, resets daily) ---
+_usage_counts: dict[str, int] = defaultdict(int)
+_usage_day: dict[str, str] = {}
+
+# Tier thresholds: msgs 1-10 = premium, 11-30 = free, 31+ = blocked (suggest BYOK)
+_TIER_PREMIUM_LIMIT = 10
+_TIER_FREE_LIMIT = 30
+
+# Model tiers
+MODEL_PREMIUM = "openai/gpt-4o-mini"           # ~$0.001/query, best tool-calling
+MODEL_FREE = "google/gemini-2.0-flash-001"      # ~$0.0003/query, decent but single-tool
 
 def _get_client_id(request: Request) -> str:
     forwarded = request.headers.get("x-forwarded-for")
     if forwarded:
         return forwarded.split(",")[0].strip()
     return request.client.host if request.client else "unknown"
+
+
+def _get_usage(client_id: str) -> int:
+    """Get daily usage count, reset if new day."""
+    today = time.strftime("%Y-%m-%d")
+    if _usage_day.get(client_id) != today:
+        _usage_counts[client_id] = 0
+        _usage_day[client_id] = today
+    return _usage_counts[client_id]
+
+
+def _increment_usage(client_id: str) -> int:
+    """Increment and return new usage count."""
+    today = time.strftime("%Y-%m-%d")
+    if _usage_day.get(client_id) != today:
+        _usage_counts[client_id] = 0
+        _usage_day[client_id] = today
+    _usage_counts[client_id] += 1
+    return _usage_counts[client_id]
+
+
+def _select_model(client_id: str, byok_key: str = "") -> tuple[str, str, str]:
+    """Select model based on usage tier or BYOK. Returns (model, api_key, tier_label)."""
+    if byok_key:
+        return MODEL_PREMIUM, byok_key, "byok"
+    usage = _get_usage(client_id)
+    if usage < _TIER_PREMIUM_LIMIT:
+        remaining = _TIER_PREMIUM_LIMIT - usage
+        return MODEL_PREMIUM, settings.openrouter_api_key, f"premium ({remaining} restantes)"
+    elif usage < _TIER_FREE_LIMIT:
+        remaining = _TIER_FREE_LIMIT - usage
+        return MODEL_FREE, settings.openrouter_api_key, f"gratuito ({remaining} restantes)"
+    else:
+        return MODEL_FREE, settings.openrouter_api_key, "limite_atingido"
 
 
 def _get_conversation(client_id: str) -> list[dict[str, str]]:
@@ -729,6 +774,8 @@ Pesquisa cidadã com dados públicos. Padrões são sinais para aprofundar, não
 async def _call_openrouter(
     messages: list[dict[str, Any]],
     session: AsyncSession,
+    model: str = "",
+    api_key: str = "",
 ) -> tuple[str, list[EntityCard], list[dict[str, Any]], float]:
     """Call OpenRouter with tool-calling loop. Returns (reply_text, entities, evidence, cost)."""
 
@@ -736,20 +783,22 @@ async def _call_openrouter(
     evidence_chain: list[dict[str, Any]] = []
     total_cost: float = 0.0
 
-    if not settings.openrouter_api_key:
-        # Fallback to direct search if no API key
+    effective_key = api_key or settings.openrouter_api_key
+    effective_model = model or settings.ai_model
+
+    if not effective_key:
         text, ents = await _fallback_search(messages[-1].get("content", ""), session)
         return text, ents, [], 0.0
 
     headers = {
-        "Authorization": f"Bearer {settings.openrouter_api_key}",
+        "Authorization": f"Bearer {effective_key}",
         "Content-Type": "application/json",
         "HTTP-Referer": "https://inteligencia.egos.ia.br",
         "X-Title": "EGOS Inteligencia",
     }
 
     payload = {
-        "model": settings.ai_model,
+        "model": effective_model,
         "messages": messages,
         "tools": TOOLS,
         "tool_choice": "auto",
@@ -1092,6 +1141,17 @@ async def chat(
     client_id = _get_client_id(request)
     history = _get_conversation(client_id)
 
+    # BYOK: user can pass own OpenRouter key via header
+    byok_key = (request.headers.get("x-openrouter-key") or "").strip()
+
+    # Select model based on usage tier or BYOK
+    selected_model, selected_key, tier_label = _select_model(client_id, byok_key)
+
+    # Rate limit check — if limit reached, prepend warning
+    tier_notice = ""
+    if tier_label == "limite_atingido":
+        tier_notice = "\n\n⚠️ **Limite diário atingido** (30 consultas). O agente continua funcionando com modelo gratuito, mas a qualidade pode ser menor.\n\n💡 **Traga sua própria chave!** Crie uma conta grátis em [openrouter.ai](https://openrouter.ai), insira créditos (~$5 dura meses) e cole sua chave nas configurações. Assim você usa os melhores modelos sem restrição."
+
     # Build messages for LLM
     messages: list[dict[str, Any]] = [{"role": "system", "content": SYSTEM_PROMPT}]
 
@@ -1112,8 +1172,8 @@ async def chat(
         "diario oficial": "Busque diários oficiais de Santos/SP usando search_gazettes com query licitação.",
         "votacoes recentes": "Busque votações recentes na Câmara usando search_votacoes para o ano 2024.",
         "investigacoes ministerio publico": "Busque na web por investigações recentes do Ministério Público usando web_search.",
-        "ver estatisticas": "Mostre as estatísticas: 317K+ entidades no grafo Neo4j, 34K+ conexões, 18 ferramentas de busca, 108 fontes catalogadas, 45 implementadas. Custo: ~R$0.003/consulta. 4 relatórios publicados.",
-        "ver estatísticas": "Mostre as estatísticas: 317K+ entidades no grafo Neo4j, 34K+ conexões, 18 ferramentas de busca, 108 fontes catalogadas, 45 implementadas. Custo: ~R$0.003/consulta. 4 relatórios publicados.",
+        "ver estatisticas": "Mostre as estatísticas: 317K+ entidades no grafo Neo4j, 34K+ conexões, 24 ferramentas de busca, 108 fontes catalogadas, 45 implementadas. Custo: ~R$0.003/consulta. 4 relatórios publicados.",
+        "ver estatísticas": "Mostre as estatísticas: 317K+ entidades no grafo Neo4j, 34K+ conexões, 24 ferramentas de busca, 108 fontes catalogadas, 45 implementadas. Custo: ~R$0.003/consulta. 4 relatórios publicados.",
     }
     for trigger, hint in _QUERY_HINTS.items():
         if trigger in msg_lower:
@@ -1123,11 +1183,24 @@ async def chat(
     messages.append({"role": "user", "content": enriched_msg})
 
     try:
-        reply, entities, evidence, cost = await _call_openrouter(messages, session)
+        reply, entities, evidence, cost = await _call_openrouter(
+            messages, session, model=selected_model, api_key=selected_key
+        )
     except Exception as e:
         logger.error("Chat failed: %s", e)
         reply, entities = await _fallback_search(body.message, session)
         evidence, cost = [], 0.0
+
+    # Increment usage AFTER successful call
+    new_count = _increment_usage(client_id)
+
+    # Append tier notice to reply
+    if tier_notice:
+        reply += tier_notice
+    elif new_count == _TIER_PREMIUM_LIMIT:
+        reply += f"\n\n💡 Você usou suas {_TIER_PREMIUM_LIMIT} consultas premium do dia. Próximas consultas usarão o modelo gratuito (Gemini Flash). Para manter a qualidade, traga sua chave OpenRouter."
+    elif new_count == _TIER_FREE_LIMIT:
+        reply += "\n\n⚠️ Limite diário atingido. Crie uma conta grátis em [openrouter.ai](https://openrouter.ai) e insira sua chave para continuar sem limites."
 
     # Save to conversation memory
     history.append({"role": "user", "content": body.message})
@@ -1136,11 +1209,11 @@ async def chat(
 
     suggestions = _generate_suggestions(reply, entities, body.message)
 
-    # Log activity
+    # Log activity with tier info
     log_activity(
         activity_type="chat",
         title=body.message[:80],
-        description=f"{len(entities)} entities, {len(evidence)} sources",
+        description=f"{len(entities)} entities, {len(evidence)} sources, model={selected_model.split('/')[-1]}, tier={tier_label}",
         source="chatbot",
         result_count=len(entities),
         cost_usd=round(cost, 6),

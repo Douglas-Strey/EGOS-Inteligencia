@@ -39,16 +39,19 @@ const TYPE_COLORS: Record<string, string> = {
   tool_call: "#ef4444",
 };
 
+const PAGE_SIZE = 10;
+
 export function Activity() {
   const [feed, setFeed] = useState<ActivityFeed | null>(null);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("");
+  const [page, setPage] = useState(0);
 
   const fetchFeed = async () => {
     try {
       const url = filter
-        ? `/api/v1/activity/feed?limit=100&type=${filter}`
-        : `/api/v1/activity/feed?limit=100`;
+        ? `/api/v1/activity/feed?limit=200&type=${filter}`
+        : `/api/v1/activity/feed?limit=200`;
       const resp = await fetch(url);
       if (resp.ok) setFeed(await resp.json());
     } catch (e) {
@@ -63,6 +66,12 @@ export function Activity() {
     const interval = setInterval(fetchFeed, 15000);
     return () => clearInterval(interval);
   }, [filter]);
+
+  useEffect(() => { setPage(0); }, [filter]);
+
+  const totalItems = feed?.items.length ?? 0;
+  const totalPages = Math.ceil(totalItems / PAGE_SIZE);
+  const pagedItems = feed?.items.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE) ?? [];
 
   if (loading) return <div className={styles.loading}>Carregando atividades...</div>;
   if (!feed) return <div className={styles.loading}>Sem dados de atividade.</div>;
@@ -99,7 +108,7 @@ export function Activity() {
       </div>
 
       <div className={styles.timeline}>
-        {feed.items.map((item) => (
+        {pagedItems.map((item) => (
           <div key={item.id} className={styles.event}>
             <div
               className={styles.eventDot}
@@ -136,6 +145,28 @@ export function Activity() {
           </div>
         )}
       </div>
+
+      {totalPages > 1 && (
+        <div className={styles.pagination}>
+          <button
+            className={styles.pageBtn}
+            disabled={page === 0}
+            onClick={() => setPage(p => Math.max(0, p - 1))}
+          >
+            ← Anterior
+          </button>
+          <span className={styles.pageInfo}>
+            Página {page + 1} de {totalPages} ({totalItems} eventos)
+          </span>
+          <button
+            className={styles.pageBtn}
+            disabled={page >= totalPages - 1}
+            onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
+          >
+            Próxima →
+          </button>
+        </div>
+      )}
     </div>
   );
 }
