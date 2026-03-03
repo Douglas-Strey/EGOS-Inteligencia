@@ -925,15 +925,17 @@
 - [x] `chat.py` reduzido de 1330 → 845 linhas (36% redução)
 > **Arquivos:** `chat_models.py`, `chat_tools.py`, `chat_prompt.py`
 
-### TASK-109: Testes Backend — Integration Tests 🟠 (P1)
-- [ ] Test search endpoint (fulltext, CNPJ, empty query)
+### TASK-109: Testes Backend — Integration Tests ⏳
+- [x] Setup pytest + httpx AsyncClient fixtures (conftest.py with mock Neo4j)
+- [x] 219 unit tests passing (session 17: fixed 3 stale assertions)
+- [x] Test patterns endpoint (list, 503 disabled, 404 invalid, include_probable)
+- [x] Test CPF masking middleware (mask, PEP exception)
+- [x] Test public_guard (CPF blocked, Person hidden, props stripped)
+- [ ] Test search endpoint against live VPS (fulltext, CNPJ, empty query)
 - [ ] Test chat endpoint (tool calling, tier fallback, rate limit)
-- [ ] Test CPF masking middleware (mask, PEP exception)
-- [ ] Test public_guard (CPF blocked, Person hidden, props stripped)
-- [ ] Test patterns endpoint (at least 3 of 10 detectors)
-- [ ] Setup pytest + httpx AsyncClient fixtures
-> **Evidência:** Zero testes em `api/tests/`
-> **Esforço:** 8h | **Impacto:** Qualidade e confiança
+- [ ] Integration tests with testcontainers Neo4j
+> **Status (session 17):** 219 pass, 1 skip, 1 xfail. Local venv at `api/.venv/`
+> **Esforço restante:** 4h | **Impacto:** Qualidade e confiança
 
 ### TASK-110: Neo4j Backup Script (Cron) ✅ (03/03/2026)
 - [x] Hot tar backup do volume Docker (sem parar Neo4j) + count snapshot
