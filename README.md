@@ -263,7 +263,7 @@ Veja [ROADMAP.md](ROADMAP.md) para o plano completo. Destaques:
 
 ---
 
-## Legal & Ética
+## Legal & Ethics
 
 - [Política de Ética](ETHICS.md) — usos proibidos, linguagem neutra
 - [LGPD](LGPD.md) — tratamento de dados pessoais
