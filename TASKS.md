@@ -1,6 +1,6 @@
 # TASKS.md — EGOS Inteligência (SSOT)
 
-> **Updated:** 2026-03-03 (session 19) | **Stars:** 74 ⭐ | **Forks:** 8 | **Patterns:** 10 | **Nodes:** 9.1M | **Tests:** 1,208+ | **Tasks:** 90/130 ✅ | **GitHub Issues:** https://github.com/enioxt/EGOS-Inteligencia/issues
+> **Updated:** 2026-03-03 (session 20) | **Stars:** 74 ⭐ | **Forks:** 8 | **Patterns:** 10 | **Nodes:** 9.1M | **Tests:** 1,208+ | **Tasks:** 93/130 ✅ | **GitHub Issues:** https://github.com/enioxt/EGOS-Inteligencia/issues
 
 ---
 
@@ -695,15 +695,25 @@
 - [x] _call_openrouter aceita model + api_key params
 > **Arquivos:** `chat.py`
 
-### TASK-096: Bug Fixes — DDG Search + PNCP API ⬜ (GitHub #32, #33)
-- [ ] DDG fallback falhando silenciosamente (8x nos logs)
-- [ ] PNCP HTTP 400: parâmetro obrigatório `codigoModalidadeContratacao` ausente
+### TASK-096: Bug Fixes — DDG Search + PNCP API ✅ (03/03/2026)
+- [x] DDG fallback: 3 regex patterns for resilience + graceful empty fallback
+- [x] PNCP: try 3 endpoint URLs (API changed), handle 400 gracefully, date normalization
 > **Issues:** #32 (P1), #33 (P2)
+> **Arquivos:** `api/src/bracc/services/transparency_tools.py`
 
 ### TASK-097: System Map — API/Routes/Pages Inventory ⬜ (GitHub #34)
 - [ ] Documentar 30+ endpoints em 10 routers
 - [ ] Frontend: 14 páginas inventory
 - [ ] Docker: 5 containers topology
+
+### TASK-118: Transparency Report + Pattern Engine ✅ (03/03/2026)
+- [x] Comprehensive transparency/methodology HTML report (10 sections)
+- [x] All 38 active data sources documented with volumes
+- [x] 41+ planned sources documented with status
+- [x] 26 AI tools, 10 pattern detectors, roadmap, limitations, call to participate
+- [x] Pattern detection engine enabled (config: patterns_enabled=True)
+- [x] Report added to Reports page as first item
+> **Arquivos:** `frontend/public/reports/transparencia-metodologia.html`, `frontend/src/pages/Reports.tsx`, `api/src/bracc/config.py`
 - [ ] OSINT: 24 tools com rate limits
 - [ ] Observability: structured logging, request tracing
 > **Issue:** #34 (P2)
