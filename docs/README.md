@@ -38,7 +38,6 @@ Este diretório centraliza documentação técnica, operacional, legal e materia
 - [Relatórios](reports/)
 - [Análises](analysis/)
 - **[Dossiê Técnico Completo (Março 2026)](TECHNICAL_DOSSIE_2026-03.md)** — Audit: arquitetura, features, riscos, LGPD, 13 tasks
-- **[Diagnóstico do Ecossistema (Março 2026)](ECOSYSTEM_DIAGNOSTIC_2026-03.md)** — Portfolio completo, casos de uso, monetização B2B, roadmap
 - [Análise Comparativa Intelink vs EGOS](MERGE_ANALYSIS.md) — Alternativas de merge, recomendação
 - [Decisão de stack e escala (Python/Go/Node)](analysis/STACK_SCALING_DECISION_2026-03.md)
 - [Plano Mycelium Audit Trail (não repúdio)](analysis/MYCELIUM_AUDIT_TRAIL_2026-03.md)
