@@ -256,9 +256,66 @@ async def _tool_stats(session: AsyncSession) -> dict[str, Any]:
         records = await execute_query(session, "stats", {})
         if records:
             return dict(records[0])
-    except Exception:
-        pass
+    except Exception as e:
+        logger.error("_tool_stats failed: %s", e)
     return {"error": "Não foi possível obter estatísticas"}
+
+
+async def _tool_cypher(session: AsyncSession, query: str, params: dict[str, Any] | None = None) -> list[dict[str, Any]]:
+    """Execute a safe read-only Cypher query. Only MATCH/RETURN/WITH/UNWIND/CALL allowed."""
+    q = query.strip().upper()
+    forbidden = ["CREATE", "DELETE", "MERGE", "SET ", "REMOVE", "DROP", "DETACH"]
+    for kw in forbidden:
+        if kw in q:
+            return [{"error": f"Query contains forbidden keyword: {kw.strip()}"}]
+    try:
+        result = await session.run(query, params or {})
+        rows = []
+        async for record in result:
+            rows.append({k: _serialize_neo4j(record[k]) for k in record.keys()})
+            if len(rows) >= 50:
+                break
+        return rows if rows else [{"message": "Query retornou 0 resultados"}]
+    except Exception as e:
+        logger.warning("Cypher query failed: %s — query: %s", e, query[:200])
+        return [{"error": str(e)[:300]}]
+
+
+def _serialize_neo4j(val: Any) -> Any:
+    """Convert Neo4j types to JSON-serializable values."""
+    if val is None:
+        return None
+    if isinstance(val, (str, int, float, bool)):
+        return val
+    if isinstance(val, list):
+        return [_serialize_neo4j(v) for v in val]
+    if isinstance(val, dict):
+        return {k: _serialize_neo4j(v) for k, v in val.items()}
+    if hasattr(val, 'items'):
+        return {k: _serialize_neo4j(v) for k, v in val.items()}
+    if hasattr(val, '__iter__'):
+        return [_serialize_neo4j(v) for v in val]
+    return str(val)
+
+
+async def _tool_data_summary(session: AsyncSession) -> dict[str, Any]:
+    """Dynamic data summary — replaces hardcoded stats in system prompt."""
+    summary: dict[str, Any] = {"tools_count": len(TOOLS)}
+    try:
+        stats = await _tool_stats(session)
+        if "error" not in stats:
+            summary["total_nodes"] = stats.get("total_nodes", 0)
+            summary["total_relationships"] = stats.get("total_relationships", 0)
+            summary["data_sources"] = stats.get("data_sources", 0)
+            summary["implemented_sources"] = stats.get("implemented_sources", 0)
+            summary["loaded_sources"] = stats.get("loaded_sources", 0)
+            summary["top_types"] = {
+                k: v for k, v in stats.items()
+                if k.endswith("_count") and isinstance(v, int) and v > 0 and k != "ingestion_run_count"
+            }
+    except Exception as e:
+        summary["error"] = str(e)[:200]
+    return summary
 
 
 async def _tool_connections(session: AsyncSession, entity_id: str) -> list[dict[str, str]]:
@@ -652,123 +709,96 @@ TOOLS = [
             },
         },
     },
+    {
+        "type": "function",
+        "function": {
+            "name": "cypher_query",
+            "description": "Executa query Cypher READ-ONLY no Neo4j. Use para consultas analiticas que os outros tools nao cobrem: top N por criterio, contagens, agregacoes, cruzamentos. Labels disponiveis: Company, Person, Sanction, Contract, PublicOffice, Embargo, Election, Amendment, Convenio, PEPRecord, GovCardExpense, GovTravel, BarredNGO. Propriedades comuns: name, razao_social, cnpj, cpf, source, value, date. Relacionamentos: SOCIO_DE, CONTRATADA_POR, SANCIONADA_POR, RECEBEU_EMENDA, VIAJOU_PARA. SEMPRE use LIMIT (max 50).",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "query": {"type": "string", "description": "Query Cypher read-only (MATCH/RETURN apenas). Ex: MATCH (c:Company)-[:SOCIO_DE]-(p:Person) RETURN c.razao_social, p.name LIMIT 10"},
+                    "params": {"type": "object", "description": "Parametros opcionais para a query ($nome, $cnpj, etc.)"},
+                },
+                "required": ["query"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "data_summary",
+            "description": "Retorna resumo dinamico do sistema: total de nos, relacionamentos, fontes de dados, tipos de entidades com contagem, numero de ferramentas. Use para responder perguntas sobre o que o sistema tem/sabe.",
+            "parameters": {"type": "object", "properties": {}},
+        },
+    },
 
 ]
 
 SYSTEM_PROMPT = """Você é o agente investigativo do EGOS Inteligência (inteligencia.egos.ia.br).
 
-## Quem você é
-- Agente de investigação em dados públicos brasileiros
-- Acesso ao grafo Neo4j com 317 mil+ entidades e 34 mil+ conexões
-- Acesso a busca web (notícias, denúncias, investigações)
-- Acesso ao Portal da Transparência (emendas, transferências, convênios)
-- Acesso ao CEAP (gastos de deputados federais — Dados Abertos da Câmara)
-- Busca de Pessoas Politicamente Expostas (PEPs) por cidade
-- Busca em diários oficiais municipais (Querido Diário — 510+ cidades)
-- Consulta CNPJ: razão social, sócios, capital social, situação cadastral
-- Votações nominais: como cada deputado votou em cada proposição
-- Servidores públicos federais: nome, salário, cargo, órgão (Portal da Transparência)
-- Licitações federais: pregões, concorrências, dispensas por UF/ano
-- CPGF: gastos com cartão corporativo do governo (restaurantes, hotéis, compras)
-- Viagens a serviço: diárias, passagens, destinos, motivo
-- Contratos federais: fornecedor, valor, vigência, aditivos
-- Sanções: CEIS (empresas inidôneas) + CNEP (empresas punidas)
-- Processos judiciais: DataJud (CNJ) — todos os tribunais do Brasil
-- Mandados de prisão: BNMP (Banco Nacional de Mandados de Prisão)
-- Pessoas procuradas: Polícia Federal + Interpol
-- Lista Suja do trabalho escravo (MTE)
-- PNCP: licitações de TODAS as esferas (federal, estadual, municipal)
-- OAB: consulta de advogados (situação, seccional)
-- OpenCNPJ: dados cadastrais completos gratuitos (sócios, CNAEs, capital)
-- Projeto 100% open-source, sem investidores, autofinanciado
-- **24 ferramentas** de investigação integradas
+## Identidade
+Agente de inteligência em dados públicos brasileiros. Open-source, autofinanciado, 26 ferramentas integradas.
+Acesso DIRETO ao grafo Neo4j, APIs de transparência, diários oficiais, processos judiciais, mandados, sanções, CNPJ.
 
-## REGRA PRINCIPAL: USE MÚLTIPLAS FERRAMENTAS
-Você DEVE chamar 2-4 ferramentas em PARALELO em cada resposta. NUNCA responda com apenas 1 ferramenta.
+## REGRA #1: SEMPRE USE FERRAMENTAS — NUNCA RESPONDA DE MEMÓRIA
+Você DEVE chamar ferramentas ANTES de responder. Se o usuário pergunta QUALQUER coisa sobre dados, chame a ferramenta.
+- Perguntas sobre o sistema → chame data_summary
+- Perguntas sobre empresas → chame search_entities + opencnpj + search_sancoes
+- Perguntas analíticas → chame cypher_query (contagens, rankings, cruzamentos)
+- NUNCA diga "temos X mil entidades" sem chamar data_summary primeiro
+- NUNCA invente números — busque sempre dados reais
 
-## Como investigar (chame MÚLTIPLAS ferramentas de uma vez)
-- CIDADE: chame search_pep_city + search_emendas + search_transferencias + search_gazettes SIMULTANEAMENTE
-- POLÍTICO: chame search_ceap + search_entities + web_search SIMULTANEAMENTE
-- EMPRESA/CNPJ: chame opencnpj + search_entities + search_sancoes + lista_suja_lookup + search_processos SIMULTANEAMENTE
-- DINHEIRO PÚBLICO: chame search_emendas + search_transferencias + search_ceap + pncp_licitacoes SIMULTANEAMENTE
-- PESSOA SUSPEITA: chame bnmp_mandados + procurados_lookup + search_entities + web_search SIMULTANEAMENTE
-- Cruze informações: CNPJ de fornecedor → opencnpj → sócios → search_entities → search_sancoes
-- Use search_gazettes para diários oficiais, search_votacoes para votos
-- SEMPRE sugira próximos passos: 'puxe o fio'
+## REGRA #2: USE MÚLTIPLAS FERRAMENTAS EM PARALELO
+Chame 2-4 ferramentas simultaneamente. Quanto mais cruzamento, melhor a investigação.
+- CIDADE: search_pep_city + search_emendas + search_transferencias + search_gazettes
+- POLÍTICO: search_ceap + search_entities + web_search + search_votacoes
+- EMPRESA/CNPJ: opencnpj + search_entities + search_sancoes + lista_suja_lookup
+- DINHEIRO: search_emendas + search_transferencias + search_ceap + pncp_licitacoes
+- PESSOA SUSPEITA: bnmp_mandados + procurados_lookup + search_entities + web_search
+- ANÁLISE DO GRAFO: cypher_query (top N, contagens, agregações, cruzamentos)
 
-## Regras CRÍTICAS
-- Responda SEMPRE em português brasileiro
-- Máximo 800 caracteres por resposta (seja conciso mas informativo)
-- NUNCA peça informação ao usuário se você pode buscar sozinho — INVESTIGUE PRIMEIRO
-- Se o usuário perguntar algo genérico como "emendas 2024", busque as maiores emendas do país inteiro
-- Se pedir "supersalários", busque servidores com maiores salários em órgãos como Senado, Câmara, TCU
-- Se pedir "licitações suspeitas", busque dispensas de licitação recentes
-- SEMPRE use pelo menos 1 ferramenta antes de responder — não responda sem dados
-- Se não souber a cidade, busque dados NACIONAIS primeiro e depois sugira aprofundar em uma cidade
-- Use **negrito** para destacar nomes, valores e CNPJs importantes
-- NUNCA exponha CPF, dados pessoais sensíveis
-- Padrões encontrados são SINAIS, nunca prova jurídica
-- Sempre cite a fonte dos dados (CEIS, CNEP, TSE, Câmara, TransfereGov, etc.)
-- Se não encontrar resultados, sugira variações de busca
-- Use MÚLTIPLAS ferramentas proativamente — não peça permissão, INVESTIGUE
+## cypher_query — Seu Superpoder
+Use para consultas analíticas que outros tools não cobrem:
+- Top empresas com mais sanções: MATCH (s:Sanction)--(c:Company) RETURN c.razao_social, count(s) AS total ORDER BY total DESC LIMIT 10
+- Sócios de empresa: MATCH (c:Company)-[:SOCIO_DE]-(p:Person) WHERE c.cnpj = $cnpj RETURN p.name, c.razao_social
+- Empresas conectadas a político: MATCH (p:Person {name: $nome})-[*1..2]-(c:Company) RETURN DISTINCT c.razao_social, c.cnpj LIMIT 20
+- Contagem por tipo: MATCH (n) RETURN labels(n)[0] AS tipo, count(n) AS total ORDER BY total DESC
+- Labels: Company, Person, Sanction, Contract, PublicOffice, Embargo, PEPRecord, GovCardExpense, GovTravel, BarredNGO
+- Rels: SOCIO_DE, CONTRATADA_POR, SANCIONADA_POR, RECEBEU_EMENDA, VIAJOU_PARA
+- SEMPRE use LIMIT (max 50)
+
+## Regras de Resposta
+- Português brasileiro SEMPRE
+- Responda de forma completa mas concisa (max ~1500 chars)
+- Use **negrito** para nomes, valores, CNPJs
+- Cite a fonte de cada dado (CEIS, CNEP, Câmara, DataJud, etc.)
+- NUNCA exponha CPF ou dados pessoais sensíveis
+- Padrões são SINAIS, nunca prova jurídica
 - Sugira próximos passos de investigação ao final
-- Mostre o CAMINHO DO DINHEIRO: federal → emenda → convênio → empresa → sócios
+- Mostre o CAMINHO DO DINHEIRO: emenda → convênio → empresa → sócios
+- Se não encontrar resultados, sugira variações de busca
+- NUNCA peça informação que você pode buscar sozinho — INVESTIGUE PRIMEIRO
+- Se a pergunta é genérica, busque dados NACIONAIS primeiro
 
-## Análise de Risco (inspirado Palantir/Intelink)
-Ao investigar uma entidade, SEMPRE avalie:
-1. **RISCO:** Quantas sanções? Quantos processos? Quantas conexões suspeitas?
-2. **MODUS OPERANDI:** Padrão repetido? Mesmos sócios em várias empresas? Mesma cidade/setor?
-3. **CROSS-REFERENCE:** Cruzar TODAS as fontes — grafo + Portal + DataJud + Querido Diário + web
-4. **CAMINHO DO DINHEIRO:** Emenda → Convênio → Empresa → Sócios → Outros CNPJs → Sanções
-5. **RED FLAGS:**
-   - Empresa sancionada COM contrato ativo = irregularidade
-   - Mesmo sócio em empresa falida E empresa nova = fraude patrimonial
-   - Fornecedor do governo em recuperação judicial = risco
-   - Doação de campanha + contrato público = conflito de interesses
-   - Servidor público sócio de empresa fornecedora = nepotismo/conflito
+## Análise de Risco
+1. **RISCO:** Sanções? Processos? Conexões suspeitas?
+2. **MODUS OPERANDI:** Padrão repetido? Mesmos sócios em várias empresas?
+3. **CROSS-REFERENCE:** Cruzar grafo + Portal + DataJud + Querido Diário + web
+4. **RED FLAGS:** Empresa sancionada com contrato ativo, sócio em falida + nova, fornecedor em RJ, doação + contrato
 
-## Bases que AINDA NÃO temos (seja honesto)
-- CNPJ/QSA completo (ETL em andamento — 53M empresas, 15% concluído)
-- ICIJ Offshore Leaks
-- ComprasNet/PNCP
-- CVM (mercado financeiro)
-- Doações de campanha TSE (próximo ETL)
+## Relatórios Publicados
+1. **SUPERAR LTDA** — RJ + contratos públicos + fraude patrimonial → /reports/report-01-superar-ltda.md
+2. **Manaus Transparência** — Emendas, convênios, licitações → /reports/report-02-manaus-transparencia.md
+3. **Recuperação Judicial SP** — Empresas em RJ com contratos → /reports/report-03-recuperacao-judicial-sp.md
+4. **Patense** — Investigação completa → /reports/patense.html
 
-## Relatórios de Investigação Disponíveis
-Você TEM acesso a relatórios completos já publicados. Quando o usuário pedir relatórios ou exemplos:
-1. **Relatório SUPERAR LTDA** — Investigação de empresa em recuperação judicial com contratos públicos ativos. Sócios com múltiplas empresas, padrão de fraude patrimonial. URL: /reports/report-01-superar-ltda.md
-2. **Relatório Manaus Transparência** — Análise de transparência municipal, emendas, convênios e licitações em Manaus/AM. URL: /reports/report-02-manaus-transparencia.md  
-3. **Relatório Recuperação Judicial SP** — Mapeamento de empresas em RJ no estado de SP com contratos públicos. URL: /reports/report-03-recuperacao-judicial-sp.md
-4. **Relatório Patense** — Investigação completa de irregularidades. URL: /reports/patense.html
+## Limitações (seja honesto)
+- CNPJ/QSA: parcial (ETL em progresso — 53M empresas)
+- ICIJ Offshore Leaks: não disponível ainda
+- Doações de campanha TSE: próximo ETL
 
-Quando o usuário perguntar sobre relatórios, LISTE todos os 4 com links e resumos. NÃO diga que não sabe.
-
-## Sugestões Inteligentes
-Quando o usuário não souber o que buscar, sugira investigações concretas:
-- "Buscar empresas sancionadas que ainda têm contratos ativos"
-- "Ver quais deputados mais gastaram com CEAP em 2024"
-- "Investigar fornecedores de um político específico"
-- "Cruzar emendas parlamentares com contratos em uma cidade"
-- "Ver recuperações judiciais com contratos públicos"
-- "Buscar supersalários de servidores públicos"
-- "Analisar diários oficiais de uma cidade por licitações suspeitas"
-
-Quando o usuário digitar algo vago como "estatísticas", "relatórios", ou "ver dados":
-- NÃO responda com "sobre o que você gostaria de investigar?"
-- RESPONDA diretamente com dados úteis ou links relevantes
-- USE suas ferramentas proativamente para buscar dados
-
-## Capacidades do Sistema
-- Custo por consulta: ~R$ 0,003 (~$0.0006)
-- Infraestrutura: $105/mês autofinanciado
-- 18 ferramentas de busca em dados públicos
-- Grafo Neo4j: 317K+ entidades, 34K+ conexões
-- 108 fontes de dados catalogadas, 45 implementadas
-- Evidence Chain: cada resposta mostra de onde veio cada dado
-- Activity Feed: todas as ações são registradas e auditáveis
-- Monitor de Diários Oficiais: 8 padrões investigativos, 10+ cidades
-
-## Disclaimer (inclua quando relevante)
+## Disclaimer
 Pesquisa cidadã com dados públicos. Padrões são sinais para aprofundar, não prova jurídica."""
 
 
@@ -803,7 +833,7 @@ async def _call_openrouter(
         "messages": messages,
         "tools": TOOLS,
         "tool_choice": "auto",
-        "max_tokens": 1200,
+        "max_tokens": 2000,
         "temperature": 0.3,
     }
 
@@ -970,6 +1000,10 @@ async def _call_openrouter(
                     )
                 elif fn_name == "opencnpj":
                     result = await tool_opencnpj(fn_args.get("cnpj", ""))
+                elif fn_name == "cypher_query":
+                    result = await _tool_cypher(session, fn_args.get("query", ""), fn_args.get("params"))
+                elif fn_name == "data_summary":
+                    result = await _tool_data_summary(session)
                 else:
                     result = {"error": f"Tool {fn_name} not found"}
 
@@ -999,6 +1033,8 @@ async def _call_openrouter(
                     "pncp_licitacoes": ("PNCP — Licitações Nacionais", "pncp.gov.br"),
                     "oab_advogado": ("OAB — Cadastro de Advogados", "cna.oab.org.br"),
                     "opencnpj": ("OpenCNPJ — Receita Federal", "opencnpj.org"),
+                    "cypher_query": ("Neo4j Graph — Cypher Query", "neo4j://localhost:7687"),
+                    "data_summary": ("Sistema EGOS Inteligência", "inteligencia.egos.ia.br"),
                 }.get(fn_name, ("Desconhecido", ""))
                 
                 result_count = 0
@@ -1027,7 +1063,7 @@ async def _call_openrouter(
                 messages.append({
                     "role": "tool",
                     "tool_call_id": tc["id"],
-                    "content": json.dumps(result, ensure_ascii=False, default=str)[:4000],
+                    "content": json.dumps(result, ensure_ascii=False, default=str)[:8000],
                 })
 
             payload["messages"] = messages
@@ -1170,24 +1206,31 @@ async def chat(
     for msg in history[-10:]:
         messages.append(msg)
 
-    # Enrich vague national queries with actionable context
+    # Enrich vague queries with actionable hints for the LLM
     enriched_msg = body.message
     msg_lower = body.message.lower().strip()
-    _QUERY_HINTS = {
-        "emendas parlamentares": "Busque emendas parlamentares para São Paulo (SP) em 2024 usando search_emendas. Mostre as maiores emendas.",
-        "supersalarios": "Busque servidores do Senado Federal usando search_servidores. Mostre os 5 com maiores salários.",
-        "supersalários": "Busque servidores do Senado Federal usando search_servidores. Mostre os 5 com maiores salários.",
-        "licitacoes suspeitas": "Busque dispensas de licitação em SP usando search_licitacoes com modalidade dispensa. Analise valores.",
-        "licitações suspeitas": "Busque dispensas de licitação em SP usando search_licitacoes com modalidade dispensa. Analise valores.",
-        "fornecedores de politicos": "Busque os maiores gastos CEAP de deputados de SP usando search_ceap. Identifique fornecedores recorrentes.",
-        "diario oficial": "Busque diários oficiais de Santos/SP usando search_gazettes com query licitação.",
-        "votacoes recentes": "Busque votações recentes na Câmara usando search_votacoes para o ano 2024.",
-        "investigacoes ministerio publico": "Busque na web por investigações recentes do Ministério Público usando web_search.",
-        "ver estatisticas": "Mostre as estatísticas: 317K+ entidades no grafo Neo4j, 34K+ conexões, 24 ferramentas de busca, 108 fontes catalogadas, 45 implementadas. Custo: ~R$0.003/consulta. 4 relatórios publicados.",
-        "ver estatísticas": "Mostre as estatísticas: 317K+ entidades no grafo Neo4j, 34K+ conexões, 24 ferramentas de busca, 108 fontes catalogadas, 45 implementadas. Custo: ~R$0.003/consulta. 4 relatórios publicados.",
-    }
-    for trigger, hint in _QUERY_HINTS.items():
-        if trigger in msg_lower:
+    _QUERY_HINTS: list[tuple[list[str], str]] = [
+        (["estatistic", "quantos dados", "quantas entidade", "o que voce sabe", "o que você sabe", "quais dados", "quais fontes", "resumo do sistema"],
+         "Chame data_summary E cypher_query com 'MATCH (n) RETURN labels(n)[0] AS tipo, count(n) AS total ORDER BY total DESC LIMIT 15'. Mostre os números reais."),
+        (["relatorio", "relatório", "report", "exemplos de investigacao"],
+         "Liste os 4 relatórios publicados com links: SUPERAR, Manaus, RJ SP, Patense. Ofereça para investigar algo novo."),
+        (["emendas parlamentar", "emendas 2024"],
+         "Chame search_emendas para SP em 2024 E search_transferencias para SP em 2024. Mostre maiores valores."),
+        (["supersalario", "supersalário", "maiores salario"],
+         "Chame search_servidores sem filtro (mostra maiores salários) E cypher_query com 'MATCH (p:PEPRecord) RETURN p.name, p.source LIMIT 10'."),
+        (["licitacoes suspeita", "licitações suspeita", "dispensa de licitacao"],
+         "Chame search_licitacoes para SP 2024 E pncp_licitacoes para SP. Analise dispensas."),
+        (["diario oficial", "diário oficial"],
+         "Chame search_gazettes para a cidade mencionada (ou São Paulo) com query 'licitação'."),
+        (["votacoes recentes", "votações recentes", "como votou"],
+         "Chame search_votacoes para 2024. Mostre votações recentes com placar."),
+        (["empresas sancionada", "lista suja", "ceis", "cnep"],
+         "Chame cypher_query com 'MATCH (s:Sanction) RETURN s.name, s.source, s.value LIMIT 15' E search_sancoes."),
+        (["o que voce pode", "o que você pode", "ajuda", "help", "como funciona", "o que faz"],
+         "Chame data_summary. Depois explique: 26 ferramentas, acesso a Neo4j, Portal da Transparência, DataJud, BNMP, diários oficiais, CNPJ, mandados, sanções. Sugira investigações."),
+    ]
+    for triggers, hint in _QUERY_HINTS:
+        if any(t in msg_lower for t in triggers):
             enriched_msg = f"{body.message}\n\n[SISTEMA: {hint}]"
             break
 
