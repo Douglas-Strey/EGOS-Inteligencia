@@ -363,18 +363,20 @@ async def _tool_find_path(
             return {"error": f"Entidade B não encontrada: {entity_b_name}", "entities_found": []}
 
         # Try shortest path between best matches
-        path_cypher = """
+        # Note: Neo4j shortestPath doesn't support parameterized depth,
+        # so we interpolate the validated integer directly into the query.
+        path_cypher = f"""
         MATCH (a) WHERE elementId(a) = $id_a
         MATCH (b) WHERE elementId(b) = $id_b
-        MATCH path = shortestPath((a)-[*1..$max_depth]-(b))
+        MATCH path = shortestPath((a)-[*1..{max_depth}]-(b))
         WITH path, length(path) AS hops
         RETURN
           [n IN nodes(path) |
-            {id: elementId(n), labels: labels(n),
-             name: coalesce(n.razao_social, n.name, n.nome_fantasia, n.cpf, '')}
+            {{id: elementId(n), labels: labels(n),
+             name: coalesce(n.razao_social, n.name, n.nome_fantasia, n.cpf, '')}}
           ] AS nodes,
           [r IN relationships(path) |
-            {type: type(r), from: elementId(startNode(r)), to: elementId(endNode(r))}
+            {{type: type(r), from_id: elementId(startNode(r)), to_id: elementId(endNode(r))}}
           ] AS relationships,
           hops
         LIMIT 3
@@ -386,7 +388,7 @@ async def _tool_find_path(
                     continue
                 result = await session.run(
                     path_cypher,
-                    {"id_a": ea["id"], "id_b": eb["id"], "max_depth": max_depth},
+                    {"id_a": ea["id"], "id_b": eb["id"]},
                 )
                 async for record in result:
                     best_paths.append({
