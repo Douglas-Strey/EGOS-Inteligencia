@@ -67,6 +67,15 @@ Output to user:
 - **GitHub:** Issues closed, PRs reviewed, upstream delta
 - **Next:** Recommended priorities for next session
 
-## 8. Persist Knowledge
+## 8. Codex Cleanup
+
+// turbo
+- Check pending Codex cloud tasks: `codex cloud list 2>/dev/null | head -10 || echo "No Codex tasks"`
+
+For each pending Codex task:
+- If completed: `codex cloud diff {id}` → review → `codex cloud apply {id}` if good
+- If stale/irrelevant: note in handoff as "Codex task {id} abandoned"
+
+## 9. Persist Knowledge
 
 Use `create_memory` to save important discoveries from this session.

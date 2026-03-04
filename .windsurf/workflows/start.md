@@ -47,7 +47,16 @@ Read `.windsurfrules` and confirm:
 // turbo
 - Forks: `gh api repos/enioxt/EGOS-Inteligencia --jq '.forks_count' 2>/dev/null || echo "?"`
 
-## 6. Output Briefing
+## 6. Codex CLI Status
+
+// turbo
+- Codex available: `which codex && codex --version 2>/dev/null || echo "Codex CLI not installed — skip delegation tasks"`
+// turbo
+- Pending cloud tasks: `codex cloud list 2>/dev/null | head -5 || echo "No pending Codex cloud tasks"`
+
+If Codex has pending diffs, remind user to review them before starting new work.
+
+## 7. Output Briefing
 
 Present to user:
 
@@ -56,4 +65,5 @@ Present to user:
 - **Recent commits:** Last 5
 - **VPS:** Container status + API live stats
 - **Fork:** Upstream delta, open PRs, recent issues, fork count
+- **Codex:** Available + pending cloud tasks
 - **Orchestration:** "Pipeline active. Gate threshold: 75."

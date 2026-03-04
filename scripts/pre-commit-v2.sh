@@ -250,9 +250,24 @@ else
   echo -e "${GREEN}   ✅ Backend-frontend in sync (or no cross-cutting changes)${NC}"
 fi
 
-# ─── SECTION 9: COMMIT MESSAGE FORMAT ────────────────────────
+# ─── SECTION 9: CODEX CLI REMINDER ───────────────────────────
 
-echo -e "\n${CYAN}📎 [9/9] Commit Convention${NC}"
+echo -e "\n${CYAN}🤖 [9/10] Codex CLI${NC}"
+if command -v codex &>/dev/null; then
+  PENDING=$(codex cloud list 2>/dev/null | grep -c "pending\|completed" || true)
+  if [ "$PENDING" -gt 0 ]; then
+    echo -e "${YELLOW}   ⚠️  $PENDING pending Codex cloud task(s) — review with: codex cloud list${NC}"
+    WARNINGS=$((WARNINGS + 1))
+  else
+    echo -e "${GREEN}   ✅ No pending Codex tasks${NC}"
+  fi
+else
+  echo -e "${GREEN}   ✅ Codex CLI not installed — skipping${NC}"
+fi
+
+# ─── SECTION 10: COMMIT MESSAGE FORMAT ───────────────────────
+
+echo -e "\n${CYAN}📎 [10/10] Commit Convention${NC}"
 echo -e "${GREEN}   ✅ Remember: feat:/fix:/chore:/docs: prefix${NC}"
 
 # ─── SUMMARY ─────────────────────────────────────────────────

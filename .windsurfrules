@@ -1,5 +1,5 @@
 # .windsurfrules — EGOS Inteligência (BR/ACC)
-# VERSION 1.0.0 — Created 2026-03-03
+# VERSION 2.0.0 — Updated 2026-03-04
 # Sacred Code: 000.111.369.963.1618
 
 ---
@@ -174,6 +174,44 @@ framework: "egos-lab"
 | Local `.guarani/PREFERENCES.md` | Python/React stack rules | **Override** |
 | Local `.windsurfrules` | This file | **Highest priority** |
 
+## CODEX CLI INTEGRATION (v1.0)
+
+> **Codex = async worker delegated by Cascade.** Never runs unsupervised.
+> **Login:** `codex login` (browser OAuth). **Config:** `~/.codex/config.toml`
+
+### Roles
+
+| Role | Command | When |
+|------|---------|------|
+| **Code Review** | `codex exec "review uncommitted changes, focus on security and LGPD"` | Pre-push |
+| **Test Writer** | `codex exec "write integration tests for {module}"` | After new API routes |
+| **Doc Updater** | `codex exec "update SYSTEM_MAP.md with current endpoints"` | After major changes |
+| **Bug Fixer** | `codex exec "fix the failing test in {file}"` | CI failures |
+| **Async Refactor** | `codex cloud exec --env ENV "{task}"` | P2 cleanup tasks |
+| **Security Audit** | `codex exec "audit {file} for injection vulnerabilities"` | Before deploy |
+
+### Delegation Rules
+
+1. **Cascade delegates, Codex executes.** Cascade defines task, reviews output.
+2. **Read-only by default.** Use `--approval-mode read-only` unless task requires edits.
+3. **Never auto-apply.** Always `codex cloud diff {id}` before `codex cloud apply {id}`.
+4. **Scope limit.** One module/file per task. Never "refactor entire codebase".
+5. **FROZEN ZONES apply.** Codex must NOT touch auth, docker-compose, Neo4j schema.
+6. **Review output.** Cascade checks diff before committing. Codex errors are common.
+
+### Pipeline Integration
+
+```bash
+# Pre-push: Codex reviews staged changes
+codex exec --approval-mode read-only "Review these changes for bugs, security issues, and LGPD compliance. Report only critical findings."
+
+# Async P2 task delegation
+codex cloud exec --env ENV "Write integration tests for api/src/bracc/routers/monitor.py"
+codex cloud list          # Check status
+codex cloud diff {id}     # Review before applying
+codex cloud apply {id}    # Apply only after Cascade review
+```
+
 ## MCPs
 
 | MCP | Use |
@@ -181,6 +219,7 @@ framework: "egos-lab"
 | Sequential Thinking | Planning P0/P1 tasks |
 | Memory | Cross-session persistence |
 | Exa | Web search for docs/APIs |
+| Codex CLI | Async code review, test writing, refactoring |
 
 ---
 
