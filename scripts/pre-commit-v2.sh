@@ -231,9 +231,28 @@ else
   fi
 fi
 
-# ─── SECTION 8: COMMIT MESSAGE FORMAT ────────────────────────
+# ─── SECTION 8: BACKEND-FRONTEND SYNC CHECK (NEW) ────────────
 
-echo -e "\n${CYAN}📎 [8/8] Commit Convention${NC}"
+echo -e "\n${CYAN}🔗 [8/9] Backend-Frontend Sync${NC}"
+
+API_FILES=$(echo "$STAGED_FILES" | grep -E '^api/src/bracc/(routers|services)/' || true)
+FE_FILES=$(echo "$STAGED_FILES" | grep -E '^frontend/src/' || true)
+
+if [ -n "$API_FILES" ] && [ -z "$FE_FILES" ]; then
+  echo -e "${YELLOW}   ⚠️  Backend API changed but NO frontend files staged:${NC}"
+  echo "$API_FILES" | head -5 | while read f; do echo "      $f"; done
+  echo "      Consider: does the frontend need updating for this API change?"
+  WARNINGS=$((WARNINGS + 1))
+elif [ -n "$FE_FILES" ] && [ -z "$API_FILES" ]; then
+  # Frontend-only changes are normal (UI tweaks), just info
+  :
+else
+  echo -e "${GREEN}   ✅ Backend-frontend in sync (or no cross-cutting changes)${NC}"
+fi
+
+# ─── SECTION 9: COMMIT MESSAGE FORMAT ────────────────────────
+
+echo -e "\n${CYAN}📎 [9/9] Commit Convention${NC}"
 echo -e "${GREEN}   ✅ Remember: feat:/fix:/chore:/docs: prefix${NC}"
 
 # ─── SUMMARY ─────────────────────────────────────────────────

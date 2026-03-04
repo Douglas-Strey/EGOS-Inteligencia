@@ -79,6 +79,9 @@ _TIER_FREE_LIMIT = 50
 # Model tiers — all Gemini Flash for cost optimization (~$0.0003/query)
 MODEL_PREMIUM = "google/gemini-2.0-flash-001"   # ~$0.0003/query, good tool-calling
 MODEL_FREE = "google/gemini-2.0-flash-001"      # same model, no tier difference now
+MODEL_FALLBACK = "google/gemini-2.0-flash-exp:free"  # free fallback when credits exhausted
+
+_CREDIT_EXHAUSTED = False  # runtime flag set when 402/payment required detected
 
 def _get_client_id(request: Request) -> str:
     forwarded = request.headers.get("x-forwarded-for")
@@ -496,6 +499,36 @@ async def _call_openrouter(
                 )
                 resp.raise_for_status()
                 data = resp.json()
+            except httpx.HTTPStatusError as e:
+                if e.response.status_code in (402, 429):
+                    global _CREDIT_EXHAUSTED
+                    _CREDIT_EXHAUSTED = True
+                    logger.warning("OpenRouter credits exhausted (HTTP %s). Switching to free model.", e.response.status_code)
+                    # Retry with free fallback model
+                    payload["model"] = MODEL_FALLBACK
+                    headers["Authorization"] = f"Bearer {effective_key}"
+                    try:
+                        resp = await client.post(
+                            "https://openrouter.ai/api/v1/chat/completions",
+                            headers=headers,
+                            json=payload,
+                        )
+                        resp.raise_for_status()
+                        data = resp.json()
+                    except Exception as e2:
+                        logger.error("Fallback model also failed: %s", e2)
+                        return (
+                            "⚠️ **Créditos de IA esgotados.** Este projeto é 100% open-source e autofinanciado.\n\n"
+                            "A busca direta no grafo ainda funciona — digite um CNPJ ou nome de empresa.\n\n"
+                            "Se quiser ajudar a manter o chatbot ativo, qualquer contribuição ajuda:\n"
+                            "- 🌟 [GitHub Star](https://github.com/enioxt/EGOS-Inteligencia)\n"
+                            "- 💬 [Telegram](https://t.me/EthikIntelligence)",
+                            [], [], 0.0,
+                        )
+                else:
+                    logger.error("OpenRouter call failed: %s", e)
+                    text, ents = await _fallback_search(messages[-1].get("content", ""), session)
+                    return text, ents, [], 0.0
             except Exception as e:
                 logger.error("OpenRouter call failed: %s", e)
                 text, ents = await _fallback_search(messages[-1].get("content", ""), session)

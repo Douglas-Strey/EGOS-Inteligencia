@@ -10,7 +10,6 @@ import {
   PatternIcon,
 } from "@/components/landing/FeatureIcons";
 import { HeroSearch } from "@/components/landing/HeroSearch";
-import { LiveDatabaseStatus } from "@/components/landing/LiveDatabaseStatus";
 import { PartnershipCTA } from "@/components/landing/PartnershipCTA";
 import { JourneyPanel } from "@/components/journey/JourneyPanel";
 import { ReportsShowcase } from "@/components/landing/ReportsShowcase";
@@ -50,36 +49,6 @@ function useReveal() {
   return setRef;
 }
 
-function formatCount(n: number): string {
-  if (n >= 1_000_000) return `${(Math.round(n / 100_000) / 10).toFixed(1)}M`;
-  if (n >= 1_000) return `${(Math.round(n / 100) / 10).toFixed(1)}K`;
-  return String(n);
-}
-
-interface SourceDef {
-  nameKey: string;
-  descKey: string;
-  countFn: (s: StatsResponse) => number | null;
-}
-
-const DATA_SOURCES: SourceDef[] = [
-  { nameKey: "CNPJ", descKey: "landing.sources.cnpj", countFn: (s) => s.company_count },
-  { nameKey: "TSE", descKey: "landing.sources.tse", countFn: (s) => s.person_count },
-  { nameKey: "Transparência", descKey: "landing.sources.transparencia", countFn: (s) => s.contract_count },
-  { nameKey: "CEIS/CNEP", descKey: "landing.sources.sanctions", countFn: (s) => s.sanction_count },
-  { nameKey: "DATASUS", descKey: "landing.sources.cnes", countFn: (s) => s.health_count },
-  { nameKey: "BNDES", descKey: "landing.sources.bndes", countFn: (s) => s.finance_count },
-  { nameKey: "PGFN", descKey: "landing.sources.pgfn", countFn: () => null },
-  { nameKey: "IBAMA", descKey: "landing.sources.ibama", countFn: (s) => s.embargo_count },
-  { nameKey: "ComprasNet", descKey: "landing.sources.comprasnet", countFn: () => null },
-  { nameKey: "TCU", descKey: "landing.sources.tcu", countFn: () => null },
-  { nameKey: "TransfereGov", descKey: "landing.sources.transferegov", countFn: (s) => s.amendment_count },
-  { nameKey: "RAIS", descKey: "landing.sources.rais", countFn: (s) => s.laborstats_count },
-  { nameKey: "INEP", descKey: "landing.sources.inep", countFn: (s) => s.education_count },
-];
-
-/* LiveDatabaseStatus and PartnershipCTA extracted to components/landing/ */
-
 interface FeatureDef {
   key: string;
   icon: ReactNode;
@@ -101,7 +70,6 @@ export function Landing() {
   const featuresRef = useReveal();
   const howRef = useReveal();
   const trustRef = useReveal();
-  const sourcesRef = useReveal();
 
   const handleSendToChat = useCallback((query: string) => {
     if (chatRef.current) {
@@ -220,33 +188,6 @@ export function Landing() {
         </div>
       </div>
 
-      <section className={styles.sources}>
-        <div ref={sourcesRef} className={`${styles.sourcesInner} ${styles.reveal}`}>
-          <span className={styles.sectionLabel}>
-            {t("landing.sources.sectionLabel", { count: stats?.data_sources ?? 0 })}
-          </span>
-          <h2 className={styles.sectionHeading}>
-            {t("landing.sources.sectionHeading")}
-          </h2>
-          <div className={styles.sourcesGrid}>
-            {DATA_SOURCES.map((source) => {
-              const count = stats ? source.countFn(stats) : null;
-              return (
-                <div key={source.nameKey} className={styles.sourceCard}>
-                  <div className={styles.sourceHeader}>
-                    <span className={styles.sourceName}>{source.nameKey}</span>
-                    <span className={styles.sourceCount}>
-                      {count != null ? formatCount(count) : "\u2014"}
-                    </span>
-                  </div>
-                  <span className={styles.sourceDesc}>{t(source.descKey)}</span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
       <ReportsShowcase />
 
       <ETLProgress />
@@ -256,7 +197,6 @@ export function Landing() {
       <UpdatesTimeline />
 
       <JourneyPanel />
-      <LiveDatabaseStatus stats={stats} />
 
       <PartnershipCTA />
 
