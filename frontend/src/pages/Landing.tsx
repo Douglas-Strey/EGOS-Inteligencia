@@ -223,7 +223,7 @@ export function Landing() {
       <section className={styles.sources}>
         <div ref={sourcesRef} className={`${styles.sourcesInner} ${styles.reveal}`}>
           <span className={styles.sectionLabel}>
-            {t("landing.sources.sectionLabel", { count: stats?.data_sources ?? "—" })}
+            {t("landing.sources.sectionLabel", { count: stats?.data_sources ?? 0 })}
           </span>
           <h2 className={styles.sectionHeading}>
             {t("landing.sources.sectionHeading")}
