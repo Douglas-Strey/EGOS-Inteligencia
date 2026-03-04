@@ -12,14 +12,6 @@ interface Report {
 
 const PUBLISHED_REPORTS: Report[] = [
   {
-    title: "Transparência, Metodologia e Fontes de Dados",
-    file: "transparencia-metodologia.html",
-    date: "03/03/2026",
-    scenario: "36 fontes ativas, 108 mapeadas, metodologia, limitações, roadmap e como participar",
-    entities: ["108 Fontes", "9.2M Nós", "10 Padrões"],
-    sources: ["Neo4j", "Portal Transparência", "TSE", "CGU", "CNJ", "ICIJ"],
-  },
-  {
     title: "Grupo Patense — Rede Societária e Financeira",
     file: "patense.html",
     date: "01/03/2026",

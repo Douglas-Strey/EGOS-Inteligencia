@@ -20,6 +20,7 @@ const EntityAnalysis = lazy(() => import("./pages/EntityAnalysis").then((m) => (
 const Analytics = lazy(() => import("./pages/Analytics").then((m) => ({ default: m.Analytics })));
 const ReportsPage = lazy(() => import("./pages/Reports").then((m) => ({ default: m.Reports })));
 const ActivityPage = lazy(() => import("./pages/Activity").then((m) => ({ default: m.Activity })));
+const MethodologyPage = lazy(() => import("./pages/Methodology").then((m) => ({ default: m.Methodology })));
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
   const token = useAuthStore((s) => s.token);
@@ -91,6 +92,7 @@ export function App() {
         <Route path="analytics" element={<Suspense fallback={<Spinner />}><Analytics /></Suspense>} />
         <Route path="reports" element={<Suspense fallback={<Spinner />}><ReportsPage /></Suspense>} />
         <Route path="activity" element={<Suspense fallback={<Spinner />}><ActivityPage /></Suspense>} />
+        <Route path="methodology" element={<Suspense fallback={<Spinner />}><MethodologyPage /></Suspense>} />
         <Route path="baseline/:entityId" element={<Baseline />} />
         {!IS_PUBLIC_MODE && <Route path="pesquisas" element={<Investigations />} />}
         {!IS_PUBLIC_MODE && <Route path="pesquisas/:investigationId" element={<Investigations />} />}
