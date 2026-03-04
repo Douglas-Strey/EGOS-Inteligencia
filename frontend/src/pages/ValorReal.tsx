@@ -1,6 +1,5 @@
 import React from 'react';
-import { useTranslation } from 'react-i18next';
-import { Calculator, DollarSign, Clock, ShieldAlert, HeartPulse, HardDrive, AlertTriangle } from 'lucide-react';
+import { Calculator, DollarSign, Clock, ShieldAlert, HeartPulse, HardDrive } from 'lucide-react';
 import { useValorReal } from '../hooks/use-valor-real';
 import styles from './ValorReal.module.css';
 
@@ -8,7 +7,6 @@ const formatMoney = (val: number) =>
     val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
 export const ValorReal: React.FC = () => {
-    const { t } = useTranslation();
     const { inputs, setInput, results } = useValorReal();
 
     return (

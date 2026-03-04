@@ -30,7 +30,7 @@ export function EagleEye() {
     const [results, setResults] = useState<GazetteResult[]>([]);
     const [total, setTotal] = useState(0);
     const [loading, setLoading] = useState(false);
-    const [activeKeyword, setActiveKeyword] = useState(KEYWORDS[0]);
+    const [activeKeyword, setActiveKeyword] = useState(KEYWORDS[0]!);
     const [cityFilter, setCityFilter] = useState("");
     const [dateRange, setDateRange] = useState(30);
     const [error, setError] = useState<string | null>(null);
