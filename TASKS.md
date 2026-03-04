@@ -230,9 +230,9 @@
 - [ ] FAB mobile-friendly
 - [ ] Exportação de timeline
 
-### TASK-030: Gem Hunter Agent ⬜ (GitHub #23)
-- [ ] Construir modular no egos-lab framework
-- [ ] Scanner de repos GitHub brasileiros de transparência
+### TASK-030: Gem Hunter Agent ✅ (GitHub #23) (04/03/2026)
+- [x] Construir modular no egos-lab framework (Feito como v2 agents/gem_hunter)
+- [x] Scanner de repos GitHub brasileiros de transparência (gem_hunter_tags.json + API)
 - [ ] Primeiro deploy no website EGOS Inteligência
 - [x] Pesquisa inicial: 9 projetos encontrados (02/03/2026)
 > **Projetos encontrados:**
