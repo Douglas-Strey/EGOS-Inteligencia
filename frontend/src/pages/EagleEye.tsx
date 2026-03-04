@@ -48,7 +48,7 @@ export function EagleEye() {
             params.set("number_of_excerpts", "2");
 
             const since = new Date(Date.now() - dateRange * 24 * 60 * 60 * 1000);
-            params.set("published_since", since.toISOString().split("T")[0]);
+            params.set("published_since", since.toISOString().split("T")[0]!);
 
             if (cityFilter.trim()) {
                 // First resolve city to territory_id
