@@ -1,6 +1,6 @@
 """Interop endpoints — NexusBridge cross-repo API.
 
-Allows authenticated sibling repositories (egos-lab, carteira-livre, forja)
+Allows authenticated sibling repositories (egos-lab, carteira-livre)
 to query the Neo4j graph securely via SERVICE_KEY authentication.
 
 Auth: X-Service-Key header (not JWT — machine-to-machine only).
@@ -8,14 +8,13 @@ Auth: X-Service-Key header (not JWT — machine-to-machine only).
 
 import logging
 import time
-from typing import Annotated
+from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, Header, HTTPException, status
 from neo4j import AsyncSession
 
 from bracc.config import settings
 from bracc.dependencies import get_session
-from bracc.services.neo4j_service import execute_query
 
 logger = logging.getLogger(__name__)
 
@@ -43,6 +42,19 @@ async def verify_service_key(
 ServiceKey = Annotated[str, Depends(verify_service_key)]
 
 
+async def _single(session: AsyncSession, cypher: str, params: dict | None = None) -> Any:
+    """Run Cypher, return first value of first record (or None)."""
+    result = await session.run(cypher, params or {})
+    record = await result.single()
+    return record[0] if record else None
+
+
+async def _rows(session: AsyncSession, cypher: str, params: dict | None = None) -> list[dict]:
+    """Run Cypher, return all records as dicts."""
+    result = await session.run(cypher, params or {})
+    return [dict(r) async for r in result]
+
+
 @router.get("/health")
 async def interop_health(
     _key: ServiceKey,
@@ -50,31 +62,11 @@ async def interop_health(
 ) -> dict:
     """Health check with Neo4j stats — for monitoring by sibling repos."""
     t0 = time.time()
-    node_count = await execute_query(
-        session,
-        "MATCH (n) RETURN count(n) AS c",
-        single_value="c",
-    )
-    rel_count = await execute_query(
-        session,
-        "MATCH ()-[r]->() RETURN count(r) AS c",
-        single_value="c",
-    )
-    company_count = await execute_query(
-        session,
-        "MATCH (c:Company) RETURN count(c) AS c",
-        single_value="c",
-    )
-    person_count = await execute_query(
-        session,
-        "MATCH (p:Person) RETURN count(p) AS c",
-        single_value="c",
-    )
-    socio_de_count = await execute_query(
-        session,
-        "MATCH ()-[r:SOCIO_DE]->() RETURN count(r) AS c",
-        single_value="c",
-    )
+    node_count = await _single(session, "MATCH (n) RETURN count(n)")
+    rel_count = await _single(session, "MATCH ()-[r]->() RETURN count(r)")
+    company_count = await _single(session, "MATCH (c:Company) RETURN count(c)")
+    person_count = await _single(session, "MATCH (p:Person) RETURN count(p)")
+    socio_de_count = await _single(session, "MATCH ()-[r:SOCIO_DE]->() RETURN count(r)")
     elapsed = time.time() - t0
 
     return {
@@ -101,7 +93,7 @@ async def interop_entity(
     if len(clean) != 14 or not clean.isdigit():
         raise HTTPException(status_code=400, detail="Invalid CNPJ format")
 
-    company = await execute_query(
+    rows = await _rows(
         session,
         """
         MATCH (c:Company {cnpj: $cnpj})
@@ -109,22 +101,22 @@ async def interop_entity(
                    .situacao_cadastral, .cnae_fiscal, .porte_empresa} AS company
         LIMIT 1
         """,
-        params={"cnpj": clean},
-        single_value="company",
+        {"cnpj": clean},
     )
+    company = rows[0]["company"] if rows else None
     if not company:
         return {"found": False, "cnpj": clean, "company": None, "partners": []}
 
-    partners = await execute_query(
+    partner_rows = await _rows(
         session,
         """
         MATCH (p:Person)-[r:SOCIO_DE]->(c:Company {cnpj: $cnpj})
         RETURN p {.nome, .qualificacao, .data_entrada} AS partner
         LIMIT 50
         """,
-        params={"cnpj": clean},
+        {"cnpj": clean},
     )
-    partner_list = [r["partner"] for r in (partners or [])] if partners else []
+    partner_list = [r["partner"] for r in partner_rows]
 
     return {
         "found": True,
@@ -161,18 +153,17 @@ async def interop_network(
         [r IN rels | type(r)] AS rel_types
     LIMIT 100
     """
-    results = await execute_query(session, query, params={"cnpj": clean})
-    nodes = []
-    if results:
-        for r in results:
-            node = {
-                "type": r.get("type"),
-                "cnpj": r.get("cnpj"),
-                "razao_social": r.get("razao_social"),
-                "nome": r.get("nome"),
-                "rel_types": r.get("rel_types", []),
-            }
-            nodes.append(node)
+    results = await _rows(session, query, {"cnpj": clean})
+    nodes = [
+        {
+            "type": r.get("type"),
+            "cnpj": r.get("cnpj"),
+            "razao_social": r.get("razao_social"),
+            "nome": r.get("nome"),
+            "rel_types": r.get("rel_types", []),
+        }
+        for r in results
+    ]
 
     return {"cnpj": clean, "hops": hops, "network_size": len(nodes), "nodes": nodes}
 
@@ -188,7 +179,7 @@ async def interop_sanctions(
     if len(clean) != 14 or not clean.isdigit():
         raise HTTPException(status_code=400, detail="Invalid CNPJ format")
 
-    sanctions = await execute_query(
+    sanction_rows = await _rows(
         session,
         """
         MATCH (c:Company {cnpj: $cnpj})-[r:SANCIONADA]->(s:Sanction)
@@ -196,20 +187,20 @@ async def interop_sanctions(
                    .data_inicio, .data_fim} AS sanction
         LIMIT 20
         """,
-        params={"cnpj": clean},
+        {"cnpj": clean},
     )
-    sanction_list = [r["sanction"] for r in (sanctions or [])] if sanctions else []
+    sanction_list = [r["sanction"] for r in sanction_rows]
 
-    barred = await execute_query(
+    barred_rows = await _rows(
         session,
         """
         MATCH (c:Company {cnpj: $cnpj})-[r:IMPEDIDA]->(b:BarredNGO)
         RETURN b {.motivo, .orgao, .data_referencia} AS barred
         LIMIT 10
         """,
-        params={"cnpj": clean},
+        {"cnpj": clean},
     )
-    barred_list = [r["barred"] for r in (barred or [])] if barred else []
+    barred_list = [r["barred"] for r in barred_rows]
 
     return {
         "cnpj": clean,
@@ -235,17 +226,17 @@ async def interop_pep(
 
     if is_cpf:
         cpf_clean = clean.replace(".", "").replace("-", "")
-        results = await execute_query(
+        rows = await _rows(
             session,
             """
             MATCH (p:PEPRecord {cpf: $cpf})
             RETURN p {.nome, .cpf, .cargo, .orgao, .data_inicio, .data_fim} AS pep
             LIMIT 10
             """,
-            params={"cpf": cpf_clean},
+            {"cpf": cpf_clean},
         )
     else:
-        results = await execute_query(
+        rows = await _rows(
             session,
             """
             MATCH (p:PEPRecord)
@@ -253,10 +244,10 @@ async def interop_pep(
             RETURN p {.nome, .cpf, .cargo, .orgao, .data_inicio, .data_fim} AS pep
             LIMIT 20
             """,
-            params={"name": clean},
+            {"name": clean},
         )
 
-    pep_list = [r["pep"] for r in (results or [])] if results else []
+    pep_list = [r["pep"] for r in rows]
 
     # Mask CPFs in response (LGPD)
     for pep in pep_list:
