@@ -2,7 +2,7 @@
 description: Session initialization for EGOS Inteligência
 ---
 
-# /start — Session Initialization (v2.0)
+# /start — Session Initialization (v2.1)
 
 ## 1. Load Core Context
 
@@ -47,14 +47,21 @@ Read `.windsurfrules` and confirm:
 // turbo
 - Forks: `gh api repos/enioxt/EGOS-Inteligencia --jq '.forks_count' 2>/dev/null || echo "?"`
 
-## 6. Codex CLI Status
+## 6. Codex CLI Status (MANDATORY)
 
 // turbo
 - Codex available: `which codex && codex --version 2>/dev/null || echo "Codex CLI not installed — skip delegation tasks"`
 // turbo
-- Pending cloud tasks: `codex cloud list 2>/dev/null | head -5 || echo "No pending Codex cloud tasks"`
+- Pending cloud tasks: `codex cloud list 2>/dev/null | head -10 || echo "No pending Codex cloud tasks"`
+// turbo
+- Review mode available: `codex review --help >/dev/null 2>&1 && echo "codex review ready" || echo "codex review unavailable"`
 
-If Codex has pending diffs, remind user to review them before starting new work.
+If Codex is available:
+- Run Codex in a **parallel terminal/tab**, never in the main interactive chat terminal.
+- Preferred quick second opinion: `codex review --uncommitted`
+- Preferred isolated analysis without writes: `codex exec -s read-only --output-last-message /tmp/codex-review.txt "review current diff"`
+- Use `codex cloud exec` only if an environment is already configured, because current CLI requires `--env <ENV_ID>`.
+- If cloud tasks are pending, review them before starting new delegation work.
 
 ## 7. Output Briefing
 
@@ -65,5 +72,5 @@ Present to user:
 - **Recent commits:** Last 5
 - **VPS:** Container status + API live stats
 - **Fork:** Upstream delta, open PRs, recent issues, fork count
-- **Codex:** Available + pending cloud tasks
+- **Codex:** Available + pending cloud tasks + execution mode (cloud vs local read-only)
 - **Orchestration:** "Pipeline active. Gate threshold: 75."

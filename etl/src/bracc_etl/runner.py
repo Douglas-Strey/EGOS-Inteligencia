@@ -174,6 +174,7 @@ def run(
         source=source,
         neo4j_database=neo4j_database,
         linking_tier=linking_tier,
+        run_id=getattr(pipeline, "run_id", None),
     )
 
     driver.close()

@@ -1,6 +1,6 @@
 # TASKS.md — EGOS Inteligência (SSOT)
 
-> **Updated:** 2026-03-04 (session 25-26) | **Stars:** 74 ⭐ | **Forks:** 8 | **Patterns:** 10 | **Nodes:** 9.2M | **Rels:** 34.5K | **Tools:** 27 | **Tasks:** 103/140 ✅ | **GitHub Issues:** https://github.com/enioxt/EGOS-Inteligencia/issues
+> **Updated:** 2026-03-06 | **Stars:** 74 ⭐ | **Forks:** 8 | **Patterns:** 10 | **Nodes:** 77.0M | **Rels:** 25.1M | **Tools:** 26 | **Tasks:** 103/141 ✅ | **GitHub Issues:** https://github.com/enioxt/EGOS-Inteligencia/issues
 
 ---
 
@@ -13,9 +13,13 @@
 - [ ] Phase 1: Build estab_lookup (status unknown — check if still running)
 - [ ] **Phase 3: Create Person/Partner nodes + SOCIO_DE relationships** 🚨
 - [ ] Phase 4: Post-load hooks (entity linking)
-> **Server:** 217.216.95.126 | **Service:** `bracc-etl.service` (systemd, auto-restart)
-> **🚨 CRITICAL FINDING (session 22):** Neo4j has only **4 SOCIO_DE** relationships (should be ~24.6M from CNPJ QSA). ETL loaded Company nodes but **NOT relationships**. This blocks ALL multi-hop traversal features. Phase 3 must be re-run.
-> **Impact:** Without SOCIO_DE, the find_connection_path tool and pattern detectors cannot discover network connections between entities.
+- [x] Fix local do pós-load `run_id` → `linking_hooks.py`/`runner.py` + teste de regressão (06/03/2026)
+> **Server:** 217.216.95.126 | **Service target:** `bracc-etl.service` (reality check 2026-03-06: inactive)
+> **Reality check 2026-03-06:** Docker stack está saudável (5/5 containers), mas o ETL não está rodando pelo systemd. O último comando ativo ficou preso em `tmux` e o log final mostra erro em `linking_hooks.py`: `Neo.ClientError.Statement.ParameterMissing: Expected parameter(s): run_id`.
+> **Estado real do grafo:** 59,573,749 `Company` + 17,454,980 `Partner` + 7,074 `Person` = **77,035,803 entidades** e **25,091,492 `SOCIO_DE`**.
+> **Control-plane drift:** `etl-monitor.sh` segue registrando “ETL running” com `CPU 0.0%` e delta zero, enquanto `/api/v1/meta/etl-progress` retorna `running=false`, `percent=90` e `last_update=2026-03-06 00:06:36`.
+> **Impact:** A Fase 3 carregou massa crítica de sócios/relacionamentos, mas o pós-load falhou, a telemetria pública está stale e a Fase 4 permanece bloqueada.
+> **Local fix já aplicado (06/03/2026):** `etl/src/bracc_etl/linking_hooks.py`, `etl/src/bracc_etl/runner.py`, `etl/tests/test_linking_hooks.py` — faltam redeploy/reexecução controlada no VPS.
 
 ### TASK-002: Neo4j Performance Optimization ⏳
 - [x] Criar script `neo4j-memory-upgrade.sh` (16G heap, 22G pagecache)
@@ -91,6 +95,46 @@
 - [x] Adicionar PartnershipCTA component
 - [x] Deploy no Contabo
 > **Arquivos:** `frontend/Dockerfile`, `frontend/src/pages/Landing.tsx`
+
+### TASK-072: Reality Check — VPS, ETL e Métricas do Sistema ⬜
+- [ ] Verificar estado real do `bracc-etl.service` e processos relacionados no VPS
+- [ ] Atualizar porcentagem real do ETL e gargalo atual (Phase 1/3/4) com evidência
+- [ ] Atualizar métricas canônicas de nós, relacionamentos, fontes, tools e capacidade em `AGENTS.md`, `TASKS.md` e relatório técnico
+- [ ] Validar se widgets/endpoints públicos de progresso refletem o estado real do sistema
+- [ ] Consolidar relatório técnico 2026-03 com capacidade, limites e próximos bloqueios
+> **Evidência já coletada (2026-03-06):** `bracc-etl.service` inactive; stack 5/5 healthy; `etl-monitor-state.json` = 17,454,980 Partner / 59,573,749 Company / 25,091,492 `SOCIO_DE`; `cnpj-etl.log` encerra com erro `Expected parameter(s): run_id`; endpoint `/api/v1/meta/etl-progress` stale em 90%.
+> **Progresso local nesta sessão:** fix mínimo do `run_id` implementado e validado com `ruff` + `pytest` (`40 passed`).
+
+### TASK-073: Relatório Técnico 2026-03 — EGOS Inteligência ⬜
+- [ ] Revisar claims públicos vs código vs VPS real
+- [ ] Consolidar arquitetura atual (API, frontend, Neo4j, Redis, bots, ETLs)
+- [ ] Explicitar o que está estável, em beta e bloqueado
+- [ ] Publicar versão atualizada do relatório em local SSOT apropriado
+
+### TASK-074: Caso Vorcaro — Mapa Público de Entidades e Sinais (GitHub #57) ⬜
+- [ ] Levantar entidades e CNPJs publicamente citáveis relacionados ao caso
+- [ ] Cruzar web pública, grafo, DataJud, diários, contratos e sanções sem linguagem acusatória
+- [ ] Separar fatos confirmados, sinais, lacunas e próximos passos de verificação
+- [ ] Produzir relatório com fontes, timestamps e caveats legais explícitos
+> **Trilha segura inicial (2026-03-06):** começar por fontes oficiais/regulatórias, depois bases societárias públicas e só então cobertura jornalística como contexto.
+> **Âncoras públicas já identificadas:**
+> 1. **Banco Central / Dados Abertos:** dataset `SFN - BANCO MASTER - EM LIQUIDAÇÃO EXTRAJUDICIAL`.
+> 2. **CVM / gov.br:** notícia de 2025 sobre rejeição de Termo de Compromisso envolvendo `Banco Master S.A.`, `Viking Participações Ltda.` e `Daniel Bueno Vorcaro`.
+> 3. **CNPJ/QSA público:** páginas de vínculo societário por nome para `Daniel Bueno Vorcaro` e empresas associadas.
+> **Regra de linguagem:** fatos = apenas o que estiver em documento oficial ou registro público nominativo; mídia entra como `sinal/contexto`, nunca como conclusão. Toda saída deve separar `fatos confirmados`, `sinais`, `lacunas` e `próximas verificações`.
+
+### TASK-075: Benchmark Global de OSINT & Public Intelligence ⬜
+- [ ] Usar Gem Hunter + pesquisa manual para mapear referências open-source relevantes no mundo
+- [ ] Comparar navegação, evidence chain, UX investigativa, relatórios e assistentes contextuais
+- [ ] Converter os melhores padrões em backlog executável para EGOS Inteligência
+
+### TASK-135: Casos Públicos do Brasil — Matriz de Benchmark Investigativo (GitHub #58) ⬜
+- [ ] Selecionar uma cesta inicial de casos públicos de alto impacto (financeiro, político, societário, regulatório)
+- [ ] Mapear para cada caso as fontes oficiais/reprodutíveis: Judiciário, MPF/PF, CVM, BCB, TCU/CGU, juntas/CNPJ, diários, fatos relevantes
+- [ ] Extrair primitivas reutilizáveis para o produto: entidade, evento, instrumento, fluxo financeiro, jurisdição, tempo, evidência, caveat legal
+- [ ] Separar claramente `fatos confirmados`, `sinais/contexto`, `lacunas` e `próximas verificações` em formato replicável
+- [ ] Conectar a matriz ao piloto já aberto em `TASK-074` (Vorcaro) sem linguagem acusatória nem implementação órfã
+> **Objetivo:** transformar grandes casos públicos em backlog de fontes, heurísticas e padrões de cruzamento para o EGOS Inteligência.
 
 ---
 

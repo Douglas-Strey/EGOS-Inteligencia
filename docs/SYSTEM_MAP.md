@@ -1,6 +1,6 @@
 # SYSTEM MAP — EGOS Inteligência
 
-> **Version:** 1.0.0 | **Updated:** 2026-03-03
+> **Version:** 1.1.0 | **Updated:** 2026-03-06
 > **Purpose:** Complete inventory of API routes, frontend pages, containers, and middleware.
 
 ---
@@ -9,7 +9,7 @@
 
 | Container | Image | Port | Purpose |
 |-----------|-------|------|---------|
-| **bracc-neo4j** | neo4j:5-community | 7474, 7687 | Graph database (9.2M nodes, 34.5K rels) |
+| **bracc-neo4j** | neo4j:5-community | 7474, 7687 | Graph database (77.0M entities, 25.1M `SOCIO_DE`) |
 | **redis** | redis:7-alpine | 6379 | Cache (512MB, allkeys-lru) |
 | **api** | python:3.12-slim | 8000 | FastAPI backend |
 | **frontend** | node:20-alpine | 5173 | React 18 + Vite |
@@ -18,6 +18,7 @@
 **Network:** `bracc` (bridge)
 **VPS:** 217.216.95.126 (Contabo, 12 vCPU, 48GB RAM, 500GB SSD)
 **Domain:** inteligencia.egos.ia.br
+**Reality check (2026-03-06):** 5/5 containers healthy, but `bracc-etl.service` inactive and `/api/v1/meta/etl-progress` stale em 90% após falha de pós-load do CNPJ.
 
 ---
 
@@ -241,4 +242,4 @@
 
 ---
 
-*55+ API endpoints | 14 pages | 26 AI tools | 10 pattern detectors | 5 containers | 2 bots*
+*55+ API endpoints | 14 pages | 26 AI tools | 10 pattern detectors | 5 containers | 2 bots | ETL control-plane drift documented*

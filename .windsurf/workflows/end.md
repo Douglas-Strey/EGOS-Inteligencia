@@ -2,7 +2,7 @@
 description: Session finalization with handoff
 ---
 
-# /end — Session Finalization (v2.0)
+# /end — Session Finalization (v2.1)
 
 ## 1. Collect Session Work
 
@@ -67,14 +67,19 @@ Output to user:
 - **GitHub:** Issues closed, PRs reviewed, upstream delta
 - **Next:** Recommended priorities for next session
 
-## 8. Codex Cleanup
+## 8. Codex Cleanup (MANDATORY)
 
 // turbo
 - Check pending Codex cloud tasks: `codex cloud list 2>/dev/null | head -10 || echo "No Codex tasks"`
+// turbo
+- Check local review capability: `codex review --help >/dev/null 2>&1 && echo "codex review ready" || echo "codex review unavailable"`
 
-For each pending Codex task:
-- If completed: `codex cloud diff {id}` → review → `codex cloud apply {id}` if good
-- If stale/irrelevant: note in handoff as "Codex task {id} abandoned"
+Before ending the session:
+- If there are uncommitted changes, run a final second opinion in a **parallel terminal**: `codex review --uncommitted`
+- For cloud tasks, inspect before applying: `codex cloud diff <TASK_ID>`
+- Apply only approved diffs: `codex cloud apply <TASK_ID>`
+- If a cloud task is stale/irrelevant, note it explicitly in the handoff as `Codex task <TASK_ID> abandoned`
+- If cloud execution is needed for the next session, record that current CLI requires `codex cloud exec --env <ENV_ID> ...`
 
 ## 9. Persist Knowledge
 
