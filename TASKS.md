@@ -111,11 +111,12 @@
 - [ ] Explicitar o que está estável, em beta e bloqueado
 - [ ] Publicar versão atualizada do relatório em local SSOT apropriado
 
-### TASK-074: Caso Vorcaro — Mapa Público de Entidades e Sinais (GitHub #57) ⬜
-- [ ] Levantar entidades e CNPJs publicamente citáveis relacionados ao caso
+### TASK-074: Caso Vorcaro — Mapa Público de Entidades e Sinais (GitHub #57) 🔄 (06/03/2026)
+- [x] Levantar entidades e CNPJs publicamente citáveis relacionados ao caso
 - [ ] Cruzar web pública, grafo, DataJud, diários, contratos e sanções sem linguagem acusatória
-- [ ] Separar fatos confirmados, sinais, lacunas e próximos passos de verificação
-- [ ] Produzir relatório com fontes, timestamps e caveats legais explícitos
+- [x] Separar fatos confirmados, sinais, lacunas e próximos passos de verificação
+- [x] Produzir relatório com fontes, timestamps e caveats legais explícitos
+> **Arquivos:** `docs/cases/caso-vorcaro-mapa-publico.md`
 > **Trilha segura inicial (2026-03-06):** começar por fontes oficiais/regulatórias, depois bases societárias públicas e só então cobertura jornalística como contexto.
 > **Âncoras públicas já identificadas:**
 > 1. **Banco Central / Dados Abertos:** dataset `SFN - BANCO MASTER - EM LIQUIDAÇÃO EXTRAJUDICIAL`.
