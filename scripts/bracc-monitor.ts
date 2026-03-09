@@ -226,16 +226,18 @@ async function fetchOpenPRs(octokit: Octokit): Promise<PREntry[]> {
     page++;
   }
 
-  // Duplicate detection: group by sorted file set fingerprint
+  // Duplicate detection: group by sorted file set fingerprint; fallback unique per PR to avoid false positives when files are empty
   const byFingerprint = new Map<string, number[]>();
+  const fingerprintKey = (pr: PREntry) =>
+    pr.files.length ? pr.files.slice().sort().join("\n") : `title:${pr.title}:pr:${pr.number}`;
   for (const pr of prs) {
-    const key = pr.files.slice().sort().join("\n") || `title:${pr.title}`;
+    const key = fingerprintKey(pr);
     const arr = byFingerprint.get(key) ?? [];
     arr.push(pr.number);
     byFingerprint.set(key, arr);
   }
   for (const pr of prs) {
-    const key = pr.files.slice().sort().join("\n") || `title:${pr.title}`;
+    const key = fingerprintKey(pr);
     const group = byFingerprint.get(key) ?? [];
     if (group.length > 1) {
       pr.duplicate_of = group.filter((n) => n !== pr.number);
@@ -338,6 +340,7 @@ async function fetchIssues(octokit: Octokit): Promise<{ upstream: IssueEntry[]; 
       if (overlap >= 2 && overlap >= Math.min(uWords.size, oWords.length) * 0.3) {
         cross_ref.push({ upstream: u, our: o });
         u.possible_duplicate_of = o.html_url;
+        break; // only record first match per upstream issue
       }
     }
   }
@@ -573,12 +576,12 @@ async function main(): Promise<void> {
   fs.writeFileSync(REPORT_PATH, JSON.stringify(report, null, 2), "utf-8");
   console.log("Report written to", REPORT_PATH);
 
-  // Update state for next run (first run: mark all as known so we don't notify)
+  // Update state for next run: keep only current forks/PRs to avoid unbounded growth; new_since still works for reappearing items
   const isFirstRun = !state.lastRun;
   saveState({
     lastRun: now,
-    knownForkIds: [...new Set([...state.knownForkIds, ...forks.map((f) => f.id)])],
-    knownPRNumbers: [...new Set([...state.knownPRNumbers, ...pull_requests.map((p) => p.number)])],
+    knownForkIds: [...new Set(forks.map((f) => f.id))],
+    knownPRNumbers: [...new Set(pull_requests.map((p) => p.number))],
   });
 
   if (!isFirstRun) {
